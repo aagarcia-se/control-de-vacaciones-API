@@ -15,6 +15,7 @@ import { usuariosRoute } from "./routes/usuarios/usuarios.rout.js";
 import { registrarDatos } from "./routes/registrarEmpleado/registrarEmpleado.rout.js";
 import { suspensionesRoute } from "./routes/suspensiones/suspensiones.route.js";
 import { comunidadesLRoute } from "./routes/catalogos/comunidadLinguistica.route.js";
+import { puestosLRoute } from "./routes/catalogos/puestos.route.js";
 
 const app = express();
 app.use(express.json());
@@ -28,6 +29,7 @@ app.use('/api/', nivelEductaivooRoute);
 app.use('/api/', estadoCivilRoute);
 app.use('/api/', departamentosRoute);
 app.use('/api/', comunidadesLRoute);
+app.use('/api/', puestosLRoute);
 
 //acciones
 app.use('/api/', cuiRoutes);
