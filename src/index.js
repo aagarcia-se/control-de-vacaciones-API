@@ -16,6 +16,7 @@ import { registrarDatos } from "./routes/registrarEmpleado/registrarEmpleado.rou
 import { suspensionesRoute } from "./routes/suspensiones/suspensiones.route.js";
 import { comunidadesLRoute } from "./routes/catalogos/comunidadLinguistica.route.js";
 import { puestosLRoute } from "./routes/catalogos/puestos.route.js";
+import { renglonRoute } from "./routes/catalogos/renglon.route.js";
 
 const app = express();
 app.use(express.json());
@@ -30,6 +31,7 @@ app.use('/api/', estadoCivilRoute);
 app.use('/api/', departamentosRoute);
 app.use('/api/', comunidadesLRoute);
 app.use('/api/', puestosLRoute);
+app.use('/api/', renglonRoute);
 
 //acciones
 app.use('/api/', cuiRoutes);

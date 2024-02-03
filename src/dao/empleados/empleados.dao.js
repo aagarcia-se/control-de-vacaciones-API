@@ -1,14 +1,15 @@
 import { Connection } from "../connection/Connection.js";
 
 export const IngresarEmpleadoDao = async (data) => {
+  console.log(data.sueldo);
     try{
         const [result] = await Connection.execute(
-            'INSERT INTO empleados (cui, primerNombre, segundoNombre, tercerNombre, primerApellido, segundoApellido, apellidoCasada, correo, celular, nit, tipoLicencia, codigoColaborador, fotografia, noIgss, correoInstitucional, cuentaBancariaCHN, valorBoletoOrnato, actualizacionOGC, extencionTelefono, codigoImpresora, idNivelEducativo, idPueblo, idComunidadLinguistica, idDiscapacidad) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            'INSERT INTO empleados (cui, primerNombre, segundoNombre, tercerNombre, primerApellido, segundoApellido, apellidoCasada, correo, celular, nit, tipoLicencia, codigoColaborador, fotografia, noIgss, correoInstitucional, cuentaBancariaCHN, valorBoletoOrnato, actualizacionOGC, extencionTelefono, codigoImpresora, idPuesto, idRenglon, sueldo, idNivelEducativo, idPueblo, idComunidadLinguistica, idDiscapacidad) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
             [
               data.cui, data.primerNombre, data.segundoNombre, data.tercerNombre, data.primerApellido, data.segundoApellido, data.apellidoCasada,
               data.correo, data.celular, data.nit, data.tipoLicencia, data.codigoColaborador, data.fotografia, data.noIgss, data.correoInstitucional,
-              data.cuentaBancariaCHN, data.valorBoletoOrnato, data.actualizacionOGC, data.extencionTelefono, data.codigoImpresora, data.idNivelEducativo,
-              data.idPubelo, data.idComunidadLinguistica, data.idDiscapacidad
+              data.cuentaBancariaCHN, data.valorBoletoOrnato, data.actualizacionOGC, data.extencionTelefono, data.codigoImpresora, data.idPuesto, data.idRenglon,
+              data.sueldo, data.idNivelEducativo, data.idPubelo, data.idComunidadLinguistica, data.idDiscapacidad
             ]
           );
         return {idEmpleado: result.insertId,
