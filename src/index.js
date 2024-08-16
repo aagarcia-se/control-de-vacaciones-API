@@ -1,47 +1,33 @@
 import express from "express";
 import cors from "cors"; // Importa cors como una función
-import { municipiosRoutes } from "./routes/catalogos/municipios.route.js";
-import { generoRoute } from "./routes/catalogos/sexo.route.js";
-import { nivelEductaivooRoute } from "./routes/catalogos/niveleducativo.route.js";
-import { estadoCivilRoute } from "./routes/catalogos/estadocivil.route.js";
-import { departamentosRoute } from "./routes/catalogos/departamentos.route.js";
-import { cuiRoutes } from "./routes/dpi/dpi.route.js";
-import { loginRoutes } from "./routes/login/login.route.js";
-import { catalogosRoute } from "./routes/catalogos/catalogos.route.js";
-import { familiaresRoute } from "./routes/familiares/familiares.route.js";
-import { emailRoute } from "./routes/email/email.route.js";
-import { empleadosRoute } from "./routes/empleados/empleados.route.js";
-import { usuariosRoute } from "./routes/usuarios/usuarios.rout.js";
-import { registrarDatos } from "./routes/registrarEmpleado/registrarEmpleado.rout.js";
-import { suspensionesRoute } from "./routes/suspensiones/suspensiones.route.js";
-import { comunidadesLRoute } from "./routes/catalogos/comunidadLinguistica.route.js";
-import { puestosLRoute } from "./routes/catalogos/puestos.route.js";
-import { renglonRoute } from "./routes/catalogos/renglon.route.js";
+import { catalogosRoute } from "./CatalogosAPI/routes/catalogos/catalogos.route.js";
+import { dpiRoute } from "./ApiVacaciones/Routes/DPI/informacionDPI.route.js";
+import { infoEmpleRoute } from "./ApiVacaciones/Routes/informacionPersonal/infoPersonalEmple.route.js";
+import { familiaresRoute } from "./ApiVacaciones/Routes/familiares/familiarEmple.route.js";
+import { nivelEducativoRoute } from "./ApiVacaciones/Routes/nivelEducativo/nivelEducativo.routes.js";
+import { pertenenciaSoLiRoute } from "./ApiVacaciones/Routes/pertenenciaSociolinguistica/pertenenciaSoli.route.js";
+import { datosMedicosRoute } from "./ApiVacaciones/Routes/datosMedicos/datosMedicos.route.js";
+import { empleadosRoute } from "./ApiVacaciones/Routes/empleados/empleados.routes.js";
+import { loginRout } from "./ApiVacaciones/Routes/login/login.route.js";
+
 
 const app = express();
 app.use(express.json());
 app.use(cors());
 
-//catalogos
-app.use('/api/', catalogosRoute)
-app.use('/api/', municipiosRoutes);
-app.use('/api/', generoRoute);
-app.use('/api/', nivelEductaivooRoute);
-app.use('/api/', estadoCivilRoute);
-app.use('/api/', departamentosRoute);
-app.use('/api/', comunidadesLRoute);
-app.use('/api/', puestosLRoute);
-app.use('/api/', renglonRoute);
+//catalogos.
+app.use('/api/', catalogosRoute);
 
 //acciones
-app.use('/api/', cuiRoutes);
-app.use('/api/', loginRoutes);
+app.use('/api/', dpiRoute);
+app.use('/api/', infoEmpleRoute);
 app.use('/api/', familiaresRoute);
-app.use('/api/', emailRoute);
+app.use('/api/', nivelEducativoRoute);
+app.use('/api/', pertenenciaSoLiRoute);
+app.use('/api/', datosMedicosRoute);
 app.use('/api/', empleadosRoute);
-app.use('/api/', usuariosRoute);
-app.use('/api/', registrarDatos);
-app.use('/api/', suspensionesRoute);
+app.use('/api/', loginRout);
+
 
 
 app.listen(3000, () => {
