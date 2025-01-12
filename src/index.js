@@ -9,6 +9,11 @@ import { pertenenciaSoLiRoute } from "./ApiVacaciones/Routes/pertenenciaSociolin
 import { datosMedicosRoute } from "./ApiVacaciones/Routes/datosMedicos/datosMedicos.route.js";
 import { empleadosRoute } from "./ApiVacaciones/Routes/empleados/empleados.routes.js";
 import { loginRout } from "./ApiVacaciones/Routes/login/login.route.js";
+import { diasFestivos } from "./ApiVacaciones/Routes/DiasFestivos/DiasFestivos.routes.js";
+import { VacationAppRoute } from "./ApiVacaciones/Routes/VacationApp/VacationApp.routes.js";
+import { reportsRoute } from "./ApiVacaciones/Routes/Reports/Reports.routes.js";
+import { suspensionesRoute } from "./ApiVacaciones/Routes/Suspensiones/Suspensiones.routes.js";
+import { coordinadoresRoute } from "./ApiVacaciones/Routes/Coordinadores/Coordinadores.routes.js";
 
 
 const app = express();
@@ -17,6 +22,7 @@ app.use(cors());
 
 //catalogos.
 app.use('/api/', catalogosRoute);
+app.use('/api/', diasFestivos);
 
 //acciones
 app.use('/api/', dpiRoute);
@@ -26,8 +32,14 @@ app.use('/api/', nivelEducativoRoute);
 app.use('/api/', pertenenciaSoLiRoute);
 app.use('/api/', datosMedicosRoute);
 app.use('/api/', empleadosRoute);
+app.use('/api/', VacationAppRoute);
 app.use('/api/', loginRout);
+app.use('/api/', suspensionesRoute);
+app.use('/api/', coordinadoresRoute);
 
+
+//Reportes
+app.use('/api/', reportsRoute);
 
 
 app.listen(3000, () => {

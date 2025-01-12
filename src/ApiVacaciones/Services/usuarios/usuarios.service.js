@@ -1,4 +1,5 @@
-import { getDatosContactoEmpleadoDao } from "../../Dao/empleados/GetDataEmpleados.js";
+
+import { getDatosContactoEmpleadoDao } from "../../Dao/empleados/GetDataEmpleados.dao.js";
 import { ObtenerNombresDao } from "../../Dao/informacionPersonal/infoPersonalEmple.dao.js";
 import { CrearUsuarioDao } from "../../Dao/usuarios/usuarios.dao.js";
 import { EnviarMailServices } from "../email/enviarEmail.service.js";
@@ -13,7 +14,7 @@ export const CrearUsuarioService = async (data) => {
         const nombres = await ObtenerNombresDao(data.idEmpleado); //se obtiene nombre del empleado para generar usuario.
         const user = await GenerarUsuarioService(nombres);
         const pass = GenerarPassword();
-        const idRol = 1;
+        const idRol = 4;
 
         const dataUser = {
             idEmpleado: data.idEmpleado,
