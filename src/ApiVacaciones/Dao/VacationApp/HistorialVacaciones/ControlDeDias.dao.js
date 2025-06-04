@@ -153,3 +153,44 @@ export const getUltiaAcreditacionDiasDao = async (idEmpleado) => {
     }
   }
 };
+
+export const debitarDiasPorPeriodoDao = async (data) => {
+  if (!Array.isArray(data)) {
+    throw new Error("El parámetro 'data' debe ser un arreglo de objetos.");
+  }
+  let Connection;
+  try {
+    Connection = await OpenConection();
+    let contadorDeInserciones = 0;
+
+    // Recorrer cada objeto dentro del array `data`
+    for (const item of data) {
+
+      const insert = `INSERT INTO historial_vacaciones (idEmpleado, idInfoPersonal, idSolicitud, periodo, diasSolicitados, diasDebitados,  diasDisponibles, fechaActualizacion, tipoRegistro) 
+                              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+      await Connection.query(insert,
+        [
+          item.idEmpleado,
+          item.idInfoPersonal,
+          item.idSolicitud,
+          item.anioPeriodo,
+          item.diasSolicitados,
+          item.diasDebitados,
+          item.diasDisponibles,
+          item.fechaActualizacion,
+          item.tipoRegistro,
+        ]
+      );
+      contadorDeInserciones++;
+    }
+
+    await Connection.commit();
+    return contadorDeInserciones; // Retorna el número de inserciones realizadas
+  } catch (error) {
+    if (Connection) await Connection.rollback(); // Deshacer cambios en caso de error
+    throw error;
+  } finally {
+    CloseConection(Connection);
+  }
+};
+

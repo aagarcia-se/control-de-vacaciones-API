@@ -32,3 +32,29 @@ export const obtenerHistorialPorEmpleadoDao = async (idEmpleado) => {
     }
   }
 };
+
+export const consultarPeriodosYDiasPorEmpeladoDao = async (idEmpleado) => {
+    try {
+      dbConnection = await OpenConection();
+      await dbConnection.beginTransaction();
+
+      const query = `SELECT periodo, MIN(diasDisponibles) AS diasDisponibles
+                    FROM historial_vacaciones 
+                    WHERE idEmpleado = ?
+                    GROUP BY periodo;`
+
+      const [periodosConDias] = await dbConnection.query(query, [idEmpleado]);
+
+      if (periodosConDias.length === 0) {
+        return  [];
+      }
+
+      await dbConnection.commit();
+
+      return periodosConDias;
+        
+    } catch (error) {
+        
+    }
+}
+
