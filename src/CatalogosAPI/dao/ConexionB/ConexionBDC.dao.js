@@ -1,11 +1,11 @@
 import { createPool } from "mysql2/promise";
 
 export const Connection = createPool({
-    host: 'bfegfxitfgbdtrqehhtr-mysql.services.clever-cloud.com',
+    host: 'bznqb5h5oyuwumtfyyor-mysql.services.clever-cloud.com',
     user: 'ugsqossvd4boz1c5',
     password: 'abHjH6zszAfNysYa9GEp',
     port: 3306,
-    database: 'bfegfxitfgbdtrqehhtr'
+    database: 'bznqb5h5oyuwumtfyyor'
 });
 
 // Función para establecer la conexión
@@ -13,7 +13,7 @@ export const ConectarBDCatalogos = async () => {
     try {
         // Obtener una conexión del pool
         const connection = await Connection.getConnection();
-        console.log('BD Catalogos abierta');
+        //console.log('BD Catalogos abierta');
         return connection;
     } catch (error) {
         console.error('Error al establecer la conexión:', error.sqlMessage);
@@ -26,6 +26,6 @@ export const ConectarBDCatalogos = async () => {
 export const CerraBDCatalogos = (connection) => {
     if (connection) {
         connection.release();
-        console.log('BD catalogos Cerrada');
+        //console.log('BD catalogos Cerrada');
     }
 };

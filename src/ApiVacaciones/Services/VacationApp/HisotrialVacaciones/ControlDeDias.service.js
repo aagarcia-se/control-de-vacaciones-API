@@ -1,13 +1,9 @@
-import {
-  acreditarDiasPorPeriodoLoteDao,
-  ActualizarDiasAcumuladosPorPeriodoDao,
-  getUltiaAcreditacionDiasDao,
-} from "../../../Dao/VacationApp/HistorialVacaciones/ControlDeDias.dao.js";
-import {
-  formatearFecha,
-  validarFechaUltimaActualizacion,
-} from "../../Utils/DateUtils.js";
-import { generarDiasAcumuladosPorPeriodo } from "./CalculoDeDias.service.js";
+import dayjs from "dayjs";
+import { consultarPeriodosYDiasPorEmpeladoDao } from "../../../Dao/VacationApp/HistorialVacaciones/ConsultasHistorial.dao.js";
+import { acreditarDiasPorPeriodoLoteDao, ActualizarDiasAcumuladosPorPeriodoDao, debitarDiasPorPeriodoDao, getUltiaAcreditacionDiasDao, } from "../../../Dao/VacationApp/HistorialVacaciones/ControlDeDias.dao.js";
+import { formatearFecha, validarFechaUltimaActualizacion, } from "../../Utils/DateUtils.js";
+import { generarDiasAcumuladosPorPeriodo, obtenerPeriodosParaVacaciones } from "./CalculoDeDias.service.js";
+import { actualizarEstadoSolicitudDao } from "../../../Dao/VacationApp/ModificarSolicitud.Dao.js";
 
 /**
  * Servicio para acreditar días de vacaciones por periodo para un empleado o grupo de empleados.
@@ -53,3 +49,49 @@ export const acreditarDiasPorPeriodoService = async (data) => {
   }
 };
 
+export const debitarDiasPorPeriodoService = async (datosSolicitud) => {
+  console.log(datosSolicitud)
+    try {
+
+      //Obtener los periodos y dias de los mismos de cada empleado
+      const periodos = await consultarPeriodosYDiasPorEmpeladoDao(datosSolicitud.idEmpleado);
+
+      //calcular los dias a debitar
+      const diasPorPeriodo = obtenerPeriodosParaVacaciones(periodos, datosSolicitud.cantidadDiasSolicitados);
+
+      const payload = diasPorPeriodo.map((periodo) => {
+        return {
+          idEmpleado: datosSolicitud.idEmpleado,
+          idInfoPersonal: datosSolicitud.idInfoPersonal, 
+          idSolicitud: datosSolicitud.idSolicitud,
+          anioPeriodo: periodo.periodo,
+          diasSolicitados: periodo.diasTomados,
+          diasDebitados: periodo.diasTomados,
+          diasDisponibles: periodo.diasDisponibles,
+          fechaActualizacion: dayjs().format("YYYY-MM-DD"),
+          tipoRegistro: 2,
+
+        };
+      });
+
+      const resultado = await debitarDiasPorPeriodoDao(payload);
+
+      if(resultado >= 0){
+        
+        const payloadActualizarEstado = {
+          estadoSolicitud: "finalizadas",
+          idSolicitud: datosSolicitud.idSolicitud,
+          idEmpleado: datosSolicitud.idEmpleado
+
+        }
+
+        await actualizarEstadoSolicitudDao(payloadActualizarEstado);
+      }
+
+
+      return resultado;
+    } catch (error) {
+        console.error("Error en la debitura de días acumulados:", error);
+        throw error;
+    }
+};
