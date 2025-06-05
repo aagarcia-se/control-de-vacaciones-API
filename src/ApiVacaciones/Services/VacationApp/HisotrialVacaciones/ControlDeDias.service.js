@@ -50,48 +50,53 @@ export const acreditarDiasPorPeriodoService = async (data) => {
 };
 
 export const debitarDiasPorPeriodoService = async (datosSolicitud) => {
-    try {
+  try {
+    //Obtener los periodos y dias de los mismos de cada empleado
+    //const periodos = await consultarPeriodosYDiasPorEmpeladoDao(
+      datosSolicitud.idEmpleado
+    );
 
-      //Obtener los periodos y dias de los mismos de cada empleado
-      const periodos = await consultarPeriodosYDiasPorEmpeladoDao(datosSolicitud.idEmpleado);
-
+    if (periodos.length === 0) {
       //calcular los dias a debitar
-      const diasPorPeriodo = obtenerPeriodosParaVacaciones(periodos, datosSolicitud.cantidadDiasSolicitados);
+      const diasPorPeriodo = obtenerPeriodosParaVacaciones(
+        periodos,
+        datosSolicitud.cantidadDiasSolicitados
+      );
 
       const payload = diasPorPeriodo.map((periodo) => {
-        if(periodo.diasDisponibles > 0){
-        return {
-          idEmpleado: datosSolicitud.idEmpleado,
-          idInfoPersonal: datosSolicitud.idInfoPersonal, 
-          idSolicitud: datosSolicitud.idSolicitud,
-          anioPeriodo: periodo.periodo,
-          diasSolicitados: periodo.diasTomados,
-          diasDebitados: periodo.diasTomados,
-          diasDisponibles: periodo.diasDisponibles,
-          fechaActualizacion: dayjs().format("YYYY-MM-DD"),
-          tipoRegistro: 2,
-        };
-      }
+        if (periodo.diasDisponibles > 0) {
+          return {
+            idEmpleado: datosSolicitud.idEmpleado,
+            idInfoPersonal: datosSolicitud.idInfoPersonal,
+            idSolicitud: datosSolicitud.idSolicitud,
+            anioPeriodo: periodo.periodo,
+            diasSolicitados: periodo.diasTomados,
+            diasDebitados: periodo.diasTomados,
+            diasDisponibles: periodo.diasDisponibles,
+            fechaActualizacion: dayjs().format("YYYY-MM-DD"),
+            tipoRegistro: 2,
+          };
+        }
       });
 
       const resultado = await debitarDiasPorPeriodoDao(payload);
 
-      if(resultado >= 0){
-        
+      if (resultado >= 0) {
         const payloadActualizarEstado = {
           estadoSolicitud: "finalizadas",
           idSolicitud: datosSolicitud.idSolicitud,
-          idEmpleado: datosSolicitud.idEmpleado
-
-        }
+          idEmpleado: datosSolicitud.idEmpleado,
+        };
 
         await actualizarEstadoSolicitudDao(payloadActualizarEstado);
       }
 
-
       return resultado;
-    } catch (error) {
-        console.error("Error en la debitura de días acumulados:", error);
-        throw error;
     }
+
+    return 0;
+  } catch (error) {
+    console.error("Error en la debitura de días acumulados:", error);
+    throw error;
+  }
 };
