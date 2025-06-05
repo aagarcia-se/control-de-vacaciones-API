@@ -52,16 +52,11 @@ export const acreditarDiasPorPeriodoService = async (data) => {
 export const debitarDiasPorPeriodoService = async (datosSolicitud) => {
   try {
     //Obtener los periodos y dias de los mismos de cada empleado
-    //const periodos = await consultarPeriodosYDiasPorEmpeladoDao(
-      datosSolicitud.idEmpleado
-    );
+    const periodos = await consultarPeriodosYDiasPorEmpeladoDao(datosSolicitud.idEmpleado);
 
     if (periodos.length === 0) {
       //calcular los dias a debitar
-      const diasPorPeriodo = obtenerPeriodosParaVacaciones(
-        periodos,
-        datosSolicitud.cantidadDiasSolicitados
-      );
+      const diasPorPeriodo = obtenerPeriodosParaVacaciones(periodos, datosSolicitud.cantidadDiasSolicitados);
 
       const payload = diasPorPeriodo.map((periodo) => {
         if (periodo.diasDisponibles > 0) {
