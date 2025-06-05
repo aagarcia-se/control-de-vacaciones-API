@@ -1,34 +1,31 @@
 import { createPool } from "mysql2/promise";
 
-export const Connection = createPool({
+// Configuración del pool de conexiones
+const pool = createPool({
     host: 'bwfndvsdnopox6glkob6-mysql.services.clever-cloud.com',
     user: 'umtiagcmlyb8i1fn',
     password: 'b7U6uKX1C761lPxpcuJc',
     port: 3306,
-    database: 'bwfndvsdnopox6glkob6'
+    database: 'bwfndvsdnopox6glkob6',
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0
 });
 
-// Función para establecer la conexión
+// Mantenemos los mismos nombres de funciones para no romper tu código existente
 export const OpenConection = async () => {
-    try {
-        // Obtener una conexión del pool
-        const connection = await Connection.getConnection();
-        //console.log('Conexión establecida correctamente');
-        return connection;
-    } catch (error) {
-        console.error('Error al establecer la conexión:', error.sqlMessage);
-        // Realizar acciones de manejo de errores, como enviar una respuesta de error al cliente
-        throw {
-            codRes: 500,
-            message: "",
-          };
-    }
+    const connection = await pool.getConnection();
+    return connection;
 };
 
-// Función para cerrar la conexión
 export const CloseConection = async (connection) => {
     if (connection) {
         await connection.release();
-        //console.log('Conexión cerrada correctamente');
     }
+};
+
+// Función adicional útil para consultas simples
+export const query = async (sql, params) => {
+    const [rows] = await pool.query(sql, params);
+    return rows;
 };
