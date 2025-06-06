@@ -36,3 +36,33 @@ export const getSolicitudesDao = async (unidadSolicitud) => {
     }
   }
 };
+
+
+export const consultarDiasSolicitadosPorAnioDao = async (idEmpleado, anio) => {
+  try {
+    dbConnection = await OpenConection();
+    await dbConnection.beginTransaction();
+
+    const query = `SELECT idEmpleado, diasSolicitados FROM historial_vacaciones 
+                    WHERE tipoRegistro = 2
+                    AND idEmpleado = ?
+                    AND YEAR(fechaActualizacion) = ?;`
+
+    const [diasSolicitados] = await dbConnection.query(query, [idEmpleado, anio]);
+
+    if(diasSolicitados.length === 0){
+      return {
+        idEmpleado: idEmpleado,
+        diasSolicitados: 0
+      }
+    }
+
+    return diasSolicitados;
+  } catch (error) {
+    throw error;
+  } finally {
+    if (dbConnection) {
+      await CloseConection(dbConnection);
+    }
+  }
+}
