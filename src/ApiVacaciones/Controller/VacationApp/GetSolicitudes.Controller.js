@@ -1,4 +1,4 @@
-import { getSolicitudesServices } from "../../Services/VacationApp/GetSolicitudes.service.js";
+import { consultarDiasSolicitadosPorAnioServices, getSolicitudesServices } from "../../Services/VacationApp/GetSolicitudes.service.js";
 
 export const getSolicitudesController = async (req, res) => {
     const { unidadSolicitud } = req.query; 
@@ -17,4 +17,19 @@ export const getSolicitudesController = async (req, res) => {
         responseData.status;
         res.status(codRes).json({ responseData });
     }
+}
+
+export const consultarDiasSolicitadosPorAnioController = async (req, res) => {
+  const { idEmpleado, anio } = req.query;
+  try {
+    const diasSolicitados = await consultarDiasSolicitadosPorAnioServices(idEmpleado, anio);
+    const responseData = {
+        status: 200,
+        message: "Data encontra correctamente",
+        diasSolicitados
+    };
+    res.status(200).json(responseData);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 }

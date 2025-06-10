@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { getSolicitudesByIdController } from "../../Controller/VacationApp/GetSolicitudesById.controller.js";
 import { actualizarEstadoSolicitudConroller, IngresarSolicitudController } from "../../Controller/VacationApp/ModificarSolicitud.controller.js";
-import { getSolicitudesController } from "../../Controller/VacationApp/GetSolicitudes.Controller.js";
+import { consultarDiasSolicitadosPorAnioController, getSolicitudesController } from "../../Controller/VacationApp/GetSolicitudes.Controller.js";
 import { acreditarDiasPorPeriodoController, debitarDiasPorPeriodoController } from "../../Controller/VacationApp/HisotoriaVacaciones/ControlDeDias.controller.js";
 import { obtenerHistorialPorEmpleadoController } from "../../Controller/VacationApp/HisotoriaVacaciones/ConsultasHistorial.controller.js";
 
@@ -15,3 +15,4 @@ VacationAppRoute.put('/UpdateEstadoSolicitud', actualizarEstadoSolicitudConrolle
 VacationAppRoute.post('/acreditarDias', acreditarDiasPorPeriodoController);
 VacationAppRoute.get('/getHistorial', obtenerHistorialPorEmpleadoController);
 VacationAppRoute.post('/debitarDias', debitarDiasPorPeriodoController);
+VacationAppRoute.get('/consultarDiasSolicitadosPorAnio', consultarDiasSolicitadosPorAnioController);

@@ -1,6 +1,4 @@
-import { getSolicitudesDao } from "../../Dao/VacationApp/GetSolicitudes.Dao.js";
-
-
+import { consultarDiasSolicitadosPorAnioDao, getSolicitudesDao } from "../../Dao/VacationApp/GetSolicitudes.Dao.js";
 
 export const getSolicitudesServices = async (unidadSolicitud) => {
     try{
@@ -10,4 +8,13 @@ export const getSolicitudesServices = async (unidadSolicitud) => {
        throw error;
  
     }
+}
+
+export const consultarDiasSolicitadosPorAnioServices = async (idEmpleado, anio) => {
+  try {
+    const diasSolicitados = await consultarDiasSolicitadosPorAnioDao(idEmpleado, anio);
+    return diasSolicitados;
+  } catch (error) {
+    throw error;
   }
+}
