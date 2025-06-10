@@ -54,7 +54,7 @@ export const debitarDiasPorPeriodoService = async (datosSolicitud) => {
     //Obtener los periodos y dias de los mismos de cada empleado
     const periodos = await consultarPeriodosYDiasPorEmpeladoDao(datosSolicitud.idEmpleado);
 
-    if (periodos.length === 0) {
+    if (periodos && periodos.length > 0) {
       //calcular los dias a debitar
       const diasPorPeriodo = obtenerPeriodosParaVacaciones(periodos, datosSolicitud.cantidadDiasSolicitados);
 
