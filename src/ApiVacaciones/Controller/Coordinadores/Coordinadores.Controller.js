@@ -1,4 +1,4 @@
-import { consultarCoordinadorService, registrarCoordinadorServices } from "../../Services/Coordinadores/Coordinadores.Service.js";
+import { consultarCoordinadoresListService, consultarCoordinadorService, registrarCoordinadorServices } from "../../Services/Coordinadores/Coordinadores.Service.js";
 
 
 
@@ -30,6 +30,24 @@ export const consultarCoordinadorController = async (req, res) => {
             status: 200,
             message: "Data encontra correctamente",
             coordinador
+        };
+        res.status(200).json(responseData);
+        
+    }catch(error){
+        const codRes = error?.codRes || 500;
+        const responseData = error?.message || error;
+        responseData.status;
+        res.status(codRes).json({ responseData });
+    }
+}
+
+export const consultarCoordinadoresListController = async (req, res) => {
+    try {
+        const coordinadores = await consultarCoordinadoresListService();
+        const responseData = {
+            status: 200,
+            message: "Data encontra correctamente",
+            coordinadores
         };
         res.status(200).json(responseData);
         

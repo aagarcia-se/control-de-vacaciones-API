@@ -1,4 +1,4 @@
-import { consultarCoordinadorDao, registrarCoordinadorDao } from "../../Dao/Coordinadores/Coordinadores.Dao.js";
+import { consultarCoordinadorDao, consultarCoordinadoresListDao, registrarCoordinadorDao } from "../../Dao/Coordinadores/Coordinadores.Dao.js";
 
 
 
@@ -23,3 +23,12 @@ export const consultarCoordinadorService = async (coordinadorUnidad) => {
   }
 
 
+  export const consultarCoordinadoresListService = async () => {
+      try{
+            const coordinador = await consultarCoordinadoresListDao();
+            return coordinador;
+      }catch(error){
+         throw error;
+   
+      }
+    }

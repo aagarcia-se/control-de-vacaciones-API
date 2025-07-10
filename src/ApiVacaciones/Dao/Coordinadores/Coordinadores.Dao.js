@@ -64,3 +64,33 @@ export const consultarCoordinadorDao = async (coordinadorUnidad) => {
     }
   }
 };
+
+
+export const consultarCoordinadoresListDao = async () => {
+  try {
+    dbConnection = await OpenConection();
+    await dbConnection.beginTransaction();
+
+    const query = `
+                        select idCoordinador, idEmpleado, nombreCoordinador, 
+                        coordinadorUnidad, correoCoordinador from coordinadores
+                        where estado = 'A';
+                    `;
+
+    const [coordinador] = await dbConnection.query(query);
+    if (coordinador.length === 0) {
+      throw {
+        codRes: 409,
+        message: "NO EXISTEN REGISTROS PARA EL COORDINADOR INGRESADO",
+      };
+    } else {
+      return coordinador;
+    }
+  } catch (error) {
+    throw error;
+  } finally {
+    if (dbConnection) {
+      await CloseConection(dbConnection);
+    }
+  }
+};
