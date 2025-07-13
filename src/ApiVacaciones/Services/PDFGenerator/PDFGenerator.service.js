@@ -6,7 +6,7 @@ import { formatDateToDisplay } from "../Utils/DateUtils.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-export const generateVacationRequestPDF = async (employeeData) => {
+export const generateVacationRequestPDF = async (employeeData, diasPorPeriodo) => {
   return new Promise((resolve, reject) => {
     const doc = new PDFDocument({ margin: 60 });
     let chunks = [];
@@ -19,7 +19,7 @@ export const generateVacationRequestPDF = async (employeeData) => {
     // Agregar logo centrado en la parte superior
     const logoPath = path.join(__dirname, "..", "..", "..", "assets", "image.png");
     const logoWidth = 150;
-    const logoYPosition = 30; // Ajusta este valor para mover la imagen más arriba
+    const logoYPosition = 30;
     doc.image(logoPath, (doc.page.width - logoWidth) / 2, logoYPosition, { width: logoWidth });
 
     // Mover hacia abajo para dar espacio después del logo
@@ -58,25 +58,53 @@ export const generateVacationRequestPDF = async (employeeData) => {
       .font("Helvetica-Bold").text(` ${formatDateToDisplay(employeeData.fechaInicioVacaciones)}`, { continued: true })
       .font("Helvetica").text(" al", { continued: true })
       .font("Helvetica-Bold").text(` ${formatDateToDisplay(employeeData.fechaFinVacaciones)}`, { continued: true })
-      .font("Helvetica").text(" a que tengo derecho.");
-      doc.moveDown(3);
+      .font("Helvetica").text(", distribuidos de la siguiente manera:");
+    doc.moveDown(1);
+
+    // Detalle de períodos de vacaciones en formato de párrafo
+    doc.font("Helvetica");
+    
+    // Si solo hay un período
+    if (diasPorPeriodo.length === 1) {
+      const periodo = diasPorPeriodo[0];
+      doc.text(`Los días solicitados corresponden al período ${periodo.periodo}, del cual se tomarán ${periodo.diasTomados} días, ` +
+               `quedando ${periodo.diasDisponibles} días disponibles para este período.`);
+    } 
+    // Si hay múltiples períodos
+    else {
+      doc.text("Los días solicitados corresponden a los siguientes períodos:");
+      doc.moveDown(0.5);
+      
+      diasPorPeriodo.forEach((periodo, index) => {
+        const bullet = index === diasPorPeriodo.length - 1 ? "• " : "• ";
+        doc.text(`${bullet}Período ${periodo.periodo}: se tomarán ${periodo.diasTomados} días, ` +
+                 `quedando ${periodo.diasDisponibles} días disponibles.`, {
+          indent: 15,
+          align: 'justify'
+        });
+      });
+    }
+
+    doc.moveDown(2);
+
+    // Texto adicional para completar el formato formal
+    doc.text("Según lo establecido en el reglamento interno de la institución y la legislación laboral aplicable.");
+    doc.moveDown(3);
 
     // Ajuste de posición de firma
     const leftX = 100;
     const rightX = 350;
 
-    doc.moveDown(2);
-
     // Línea de firma
     const lineY = doc.y;
     doc.text("__________________________", leftX, lineY);
     doc.text("__________________________", rightX, lineY);
-    doc.moveDown(4);
+    doc.moveDown(0.5);
 
     // Texto de firma
     const signatureTextY = lineY + 18;
-    doc.font("Helvetica-Bold").text("Firma del solicitante", leftX + 35, signatureTextY); // Ajustar posición centrada
-    doc.text("Vo.Bo.", rightX + 80, signatureTextY); // Ajustar posición centrada
+    doc.font("Helvetica-Bold").text("Firma del solicitante", leftX + 35, signatureTextY);
+    doc.text("Vo.Bo.", rightX + 80, signatureTextY);
 
     // Finalizar el documento
     doc.end();

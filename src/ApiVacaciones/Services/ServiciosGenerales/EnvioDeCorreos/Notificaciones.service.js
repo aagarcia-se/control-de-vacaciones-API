@@ -3,6 +3,8 @@ import { EnviarMailSolicitudDeVacaciones } from "../../email/EnvioEmailVacacione
 import { generateVacationRequestPDF } from "../../PDFGenerator/PDFGenerator.service.js";
 import { consultarCoordinadorService } from "../../Coordinadores/Coordinadores.Service.js";
 import { getSolicitudesByIdSolcitudDao } from "../../../Dao/VacationApp/GetSolicitudById.Dao.js";
+import { consultarPeriodosYDiasPorEmpeladoDao } from "../../../Dao/VacationApp/HistorialVacaciones/ConsultasHistorial.dao.js";
+import { obtenerPeriodosParaVacaciones } from "../../VacationApp/HisotrialVacaciones/CalculoDeDias.service.js";
 
 export const notificarSolicitudVacacionesIngresada = async (data) => {
   try {
@@ -19,9 +21,9 @@ export const notificarSolicitudVacacionesIngresada = async (data) => {
     const plantillaHtml = GenerarPlantillasCorreos("solicitud-vacaciones",dataSolicitud);
 
     //Generar pdf de la autorizacion
-    const bufferPDF = await generateVacationRequestPDF(dataSolicitud);
-
-   
+    const periodos = await consultarPeriodosYDiasPorEmpeladoDao(data.idEmpleado);
+    const diasPorPeriodo = obtenerPeriodosParaVacaciones(periodos, dataSolicitud.cantidadDiasSolicitados);
+    const bufferPDF = await generateVacationRequestPDF(dataSolicitud,diasPorPeriodo);
 
     //Envio de correo solicitud autorizada
     await EnviarMailSolicitudDeVacaciones(
