@@ -2,6 +2,7 @@ import {
   getSolicitudesByIdDao,
   getSolicitudesByIdSolcitudDao,
 } from "../../Dao/VacationApp/GetSolicitudById.Dao.js";
+import { consultarPeriodosYDiasPorEmpeladoDao } from "../../Dao/VacationApp/HistorialVacaciones/ConsultasHistorial.dao.js";
 import {
   actualizarEstadoSolicitudDao,
   eliminarSolicitudDao,
@@ -12,6 +13,7 @@ import { consultarCoordinadorService } from "../Coordinadores/Coordinadores.Serv
 import { EnviarMailAutorizacionDeVacaciones } from "../email/EnvioEmailVacacionesAutorizadas.service.js";
 import { generateVacationRequestPDF } from "../PDFGenerator/PDFGenerator.service.js";
 import { notificarSolicitudVacacionesIngresada } from "../ServiciosGenerales/EnvioDeCorreos/Notificaciones.service.js";
+import { obtenerPeriodosParaVacaciones } from "./HisotrialVacaciones/CalculoDeDias.service.js";
 
 export const IngresarSolicitudService = async (data) => {
   try {
@@ -29,7 +31,7 @@ export const IngresarSolicitudService = async (data) => {
     data.idSolicitud = idSolicitud;
 
     // Notificar de la solicitud ingresada via Correo al coordinador de la unidad
-    await notificarSolicitudVacacionesIngresada(data);
+     await notificarSolicitudVacacionesIngresada(data);
 
     return idSolicitud;
   } catch (error) {
@@ -44,7 +46,6 @@ export const IngresarSolicitudService = async (data) => {
       
       return idSolicitud;
     }
-
     throw error; // Mantener el throw para que el error se propague
   }
 
@@ -68,7 +69,9 @@ export const actualizarEstadoSolicitudService = async (data) => {
 
     //Generar pdf de la autorizacion
     if(data.estadoSolicitud === "autorizadas"){
-      bufferPDF = await generateVacationRequestPDF(solicitudCompleta);
+      const periodos = await consultarPeriodosYDiasPorEmpeladoDao(data.idEmpleado);
+      const diasPorPeriodo = obtenerPeriodosParaVacaciones(periodos, solicitud.cantidadDiasSolicitados);
+      bufferPDF = await generateVacationRequestPDF(solicitudCompleta,diasPorPeriodo);
     }
     
     //Generar plantilla html para envio de correo.
