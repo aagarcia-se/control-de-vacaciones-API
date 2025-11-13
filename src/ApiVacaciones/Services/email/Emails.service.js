@@ -1,7 +1,6 @@
 import { EnviarMailServices } from "./enviarEmail.service.js";
 
 export const EnviarCorreoElectronicoServices = async (data) => {
-    console.log(data)
     try{
         const res = await EnviarMailServices(data);
         return res;
