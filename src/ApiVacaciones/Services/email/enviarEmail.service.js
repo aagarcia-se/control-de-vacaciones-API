@@ -84,9 +84,12 @@ export const EnviarMailServices = async (data) => {
 
   // Enviar el correo electrónico
   transporter.sendMail(mailOptions, (error, info) => {
+    console.log("paso 1");
     if (error) {
+      console.log("paso 2");
       console.error(error);
     } else {
+      console.log("paso 3");
       console.log("Correo electrónico enviado: " + info.response);
     }
   });
