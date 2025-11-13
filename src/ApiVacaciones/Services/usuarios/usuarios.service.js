@@ -25,7 +25,7 @@ export const CrearUsuarioService = async (data) => {
         }
 
         const idUsuario = await CrearUsuarioDao(dataUser);
-        const response = await EnviarMailServices(dataUser);
+        await EnviarMailServices(dataUser);
 
         return idUsuario;;
     }catch(error){
