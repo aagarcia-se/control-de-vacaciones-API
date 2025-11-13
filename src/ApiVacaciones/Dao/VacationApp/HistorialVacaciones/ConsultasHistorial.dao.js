@@ -54,7 +54,39 @@ export const consultarPeriodosYDiasPorEmpeladoDao = async (idEmpleado) => {
       return periodosConDias;
         
     } catch (error) {
-        
+        throw error;
+    }finally{
+      if (dbConnection) {
+        await CloseConection(dbConnection);
+      }
     }
+}
+
+export const consultarDiasDisponiblesDeVacacacionesDao = async (idEmpleado) => {
+  try {
+    dbConnection = await OpenConection();
+    await dbConnection.beginTransaction();
+
+    const query = `select sum(diasDisponibles)diasDisponiblesT
+                      from historial_vacaciones
+                      where idEmpleado = ?;`
+
+    const [diasDisponibles] = await dbConnection.query(query, [idEmpleado]);
+
+    if (diasDisponibles.length === 0) {
+      return [];
+    }
+
+    await dbConnection.commit();
+
+    return diasDisponibles[0];
+
+  } catch (error) {
+    throw error;
+  } finally {
+    if (dbConnection) {
+      await CloseConection(dbConnection);
+    }
+  }
 }
 
