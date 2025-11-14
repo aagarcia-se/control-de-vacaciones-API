@@ -208,7 +208,7 @@ CREATE TABLE `historial_vacaciones` (
   `idEmpleado` INTEGER NOT NULL,
   `idInfoPersonal` INTEGER NOT NULL,
   `idSolicitud` INTEGER,
-  `periodo` TEXT NOT NULL,
+  `periodo` INTEGER NOT NULL,
   `diasAcreditados` INTEGER,
   `diasSolicitados` INTEGER,
   `diasDebitados` INTEGER,
@@ -236,4 +236,13 @@ CREATE TABLE `suspensiones` (
   `fechaIngresoGestion` DATETIME DEFAULT CURRENT_TIMESTAMP,
   `estado` TEXT DEFAULT 'A',
   FOREIGN KEY (`idEmpleado`) REFERENCES `empleados`(`idEmpleado`) ON DELETE CASCADE
+);
+
+-- Tabla principal de parámetros
+CREATE TABLE IF NOT EXISTS config_params (
+    idParam INTEGER PRIMARY KEY AUTOINCREMENT,
+    servicio TEXT NOT NULL,
+    descripcion TEXT NOT NULL,
+    valor TEXT NOT NULL,
+    estado TEXT NOT NULL DEFAULT 'A',
 );

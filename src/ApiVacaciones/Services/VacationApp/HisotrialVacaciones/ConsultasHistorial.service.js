@@ -1,4 +1,4 @@
-import { consultarDiasDisponiblesDeVacacacionesDao, obtenerHistorialPorEmpleadoDao } from "../../../Dao/VacationApp/HistorialVacaciones/ConsultasHistorial.dao.js";
+import { consultarDiasDebitadosPorAnioDao, consultarDiasDisponiblesDao, obtenerHistorialPorEmpleadoDao } from "../../../Dao/VacationApp/HistorialVacaciones/ConsultasHistorial.dao.js";
 
 export const obtenerHistorialPorEmpleadoService = async (idEmpleado) => {
     try{
@@ -9,9 +9,18 @@ export const obtenerHistorialPorEmpleadoService = async (idEmpleado) => {
     }
 }
 
-export const consultarDiasDisponiblesDeVacacacionesServices = async (idEmpleado) => {
+export const consultarDiasDebitadosPorAnioServices = async (idEmpleado, anio) => {
       try{
-          const historial = await consultarDiasDisponiblesDeVacacacionesDao(idEmpleado);
+          const historial = await consultarDiasDebitadosPorAnioDao(idEmpleado, anio);
+          return historial;
+    }catch(error){
+       throw error;
+    }
+}
+
+export const consultarDiasDisponiblesServices = async (idEmpleado) => {
+    try{
+          const historial = await consultarDiasDisponiblesDao(idEmpleado);
           return historial;
     }catch(error){
        throw error;
