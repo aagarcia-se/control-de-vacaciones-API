@@ -1,68 +1,55 @@
-import { CloseConection, OpenConection } from "../Connection/ConexionV.dao.js";
-
-let dbConnection;
+import { Connection } from "../Connection/ConexionSqlite.dao.js";
 
 export const getSolicitudesDao = async (unidadSolicitud) => {
   try {
-    dbConnection = await OpenConection();
-    await dbConnection.beginTransaction();
-
     const query = `SELECT 
                         sl.idSolicitud, sl.idEmpleado,  sl.idInfoPersonal, 
-                        CONCAT(inf.primerNombre, ' ', inf.segundoNombre, ' ', inf.primerApellido, ' ', inf.segundoApellido) AS nombreCompleto, 
+                        (inf.primerNombre || ' ' || inf.segundoNombre || ' ' || inf.primerApellido || ' ' || inf.segundoApellido) AS nombreCompleto, 
                         sl.unidadSolicitud, sl.fechaInicioVacaciones, sl.fechaFinVacaciones, sl.fechaRetornoLabores, sl.cantidadDiasSolicitados, 
                         sl.estadoSolicitud, sl.fechaSolicitud, sl.descripcionRechazo
                     FROM 
                         solicitudes_vacaciones sl
                     JOIN 
                         infoPersonalEmpleados inf ON sl.idInfoPersonal = inf.idInfoPersonal
-                        and unidadSolicitud = ?;
+                    WHERE 
+                        unidadSolicitud = ?;
                     `;
 
-    const [solicitudes] = await dbConnection.query(query, [unidadSolicitud]);
-    if (solicitudes.length === 0) {
+    const result = await Connection.execute(query, [unidadSolicitud]);
+    
+    if (result.rows.length === 0) {
       throw {
         codRes: 409,
         message: "NO EXISTE SOLICITUDES",
       };
     } else {
-      return solicitudes;
+      return result.rows;
     }
   } catch (error) {
+    console.log("Error en getSolicitudesDao:", error);
     throw error;
-  } finally {
-    if (dbConnection) {
-      await CloseConection(dbConnection);
-    }
   }
 };
 
-
 export const consultarDiasSolicitadosPorAnioDao = async (idEmpleado, anio) => {
   try {
-    dbConnection = await OpenConection();
-    await dbConnection.beginTransaction();
-
     const query = `SELECT idEmpleado, diasSolicitados FROM historial_vacaciones 
                     WHERE tipoRegistro = 2
                     AND idEmpleado = ?
-                    AND YEAR(fechaActualizacion) = ?;`
+                    AND strftime('%Y', fechaActualizacion) = ?;`;
 
-    const [diasSolicitados] = await dbConnection.query(query, [idEmpleado, anio]);
+    const result = await Connection.execute(query, [idEmpleado, anio]);
 
-    if(diasSolicitados.length === 0){
+    if (result.rows.length === 0) {
       return {
         idEmpleado: idEmpleado,
         diasSolicitados: 0
-      }
+      };
     }
 
-    return diasSolicitados;
+    return result.rows;
   } catch (error) {
+    console.log("Error en consultarDiasSolicitadosPorAnioDao:", error);
     throw error;
-  } finally {
-    if (dbConnection) {
-      await CloseConection(dbConnection);
-    }
   }
-}
+};

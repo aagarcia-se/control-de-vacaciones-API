@@ -1,47 +1,36 @@
-import { CloseConection, OpenConection } from "../Connection/ConexionV.dao.js";
+import { Connection } from "../Connection/ConexionSqlite.dao.js";
 
 export const CrearUsuarioDao = async (data) => {
-    let dbConnection;
     try {
-        dbConnection = await OpenConection();
-        await dbConnection.beginTransaction();
+        const query = "INSERT INTO usuarios (idEmpleado, idRol, usuario, pass) VALUES (?, ?, ?, ?);";
 
-        const query = "insert into usuarios (idEmpleado, idRol, usuario, pass) values (?, ?, ?, ?);";
-
-        const [result] = await dbConnection.query(query, [
+        const result = await Connection.execute(query, [
             data.idEmpleado,
             data.idRol,
             data.user,
             data.pass
         ]);
 
-        await dbConnection.commit();
-        return result.insertId;
+        return Number(result.lastInsertRowid);
     } catch (error) {
-        if (dbConnection) {
-            await dbConnection.rollback();
-        }
+        console.log("Error en CrearUsuarioDao:", error);
         throw error;
-    } finally {
-        if (dbConnection) {
-            await CloseConection(dbConnection);
-        }
     }
-}
-
+};
 
 export const consultarExistenciaUsuarioDao = async (nombreUsuario) => {
-    let dbConnection;
-    try{
-        dbConnection = await OpenConection();
+    try {
+        const sql = 'SELECT usuario FROM usuarios WHERE usuario = ?;';
 
-        const sql = 'select usuario from usuarios where usuario = ?;';
-
-        const [usuario] = await dbConnection.query(sql, [nombreUsuario]);
-        return usuario[0]; 
-    }catch(error){
-        return error;
-    }finally{
-        CloseConection(dbConnection);
+        const result = await Connection.execute(sql, [nombreUsuario]);
+        
+        if (result.rows.length === 0) {
+            return null; // No existe el usuario
+        }
+        
+        return result.rows[0]; 
+    } catch (error) {
+        console.log("Error en consultarExistenciaUsuarioDao:", error);
+        throw error;
     }
-}
+};

@@ -1,34 +1,26 @@
-import { CloseConection, OpenConection } from "../Connection/ConexionV.dao.js";
-
-let dbConnection;
+import { Connection } from "../Connection/ConexionSqlite.dao.js";
 
 export const obtenerInfoPersonalDao = async (idInfoPersonal) => {
   try {
-    dbConnection = await OpenConection();
-    await dbConnection.beginTransaction();
-
-    const query = `select idInfoPersonal, primerNombre, segundoNombre, tercerNombre,  
+    const query = `SELECT idInfoPersonal, primerNombre, segundoNombre, tercerNombre,  
                     primerApellido, segundoApellido, apellidoCasada,
                     numeroCelular, correoPersonal, direccionResidencia, estadoCivil, genero,
                     nit, numAfiliacionIgss, fechaNacimiento
-                    from infoPersonalEmpleados
-                    where idInfoPersonal = ?;
-                      `;
+                    FROM infoPersonalEmpleados
+                    WHERE idInfoPersonal = ?;`;
 
-    const [infoPersonal] = await dbConnection.query(query, [idInfoPersonal]);
-    if (infoPersonal.length === 0) {
+    const result = await Connection.execute(query, [idInfoPersonal]);
+    
+    if (result.rows.length === 0) {
       throw {
         codRes: 409,
         message: "NO EXISTE EMPLEADO CON EL ID INGRESADO",
       };
     } else {
-      return infoPersonal[0];
+      return result.rows[0];
     }
   } catch (error) {
+    console.log("Error en obtenerInfoPersonalDao:", error);
     throw error;
-  } finally {
-    if (dbConnection) {
-      await CloseConection(dbConnection);
-    }
   }
 };

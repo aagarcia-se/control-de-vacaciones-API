@@ -1,16 +1,11 @@
-import { CerraBDCatalogos, ConectarBDCatalogos } from "../ConexionB/ConexionBDC.dao.js";
-
+import { Connection } from "../ConexionB/ConexionCatSqlite.js";
 
 export const getDepartamentosDao = async () => {
-    let catalogosBD;
-    
-    try{
-        catalogosBD = await ConectarBDCatalogos();
-        const [departamentos] = await catalogosBD.query("select idDepartamento, departamento, estado from departamentos;");
-        return [departamentos]; 
-    }catch(error){
-        return error;
-    }finally{
-        CerraBDCatalogos(catalogosBD);
+    try {
+        const result = await Connection.execute("SELECT idDepartamento, departamento, estado FROM departamentos;");
+        return [result.rows]; 
+    } catch (error) {
+        console.log("Error en getDepartamentosDao:", error);
+        throw error;
     }
-}
+};

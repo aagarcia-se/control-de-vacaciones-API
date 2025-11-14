@@ -1,41 +1,49 @@
-import { CloseConection, OpenConection } from "../Connection/ConexionV.dao.js";
-
+import { Connection } from "../Connection/ConexionSqlite.dao.js";
 
 export const IngresarInformacionDpiDao = async (data) => {
-    let Connection;
-    try{
-        Connection = await OpenConection();
-        const [existingDpi] = await Connection.query("select numeroDocumento from dpiEmpleados where numeroDocumento = ? and estado = 'A';", [data.numeroDocumento]);
-        if(existingDpi.length === 1){
-            throw  {
+    try {
+        // Verificar si el documento ya existe
+        const existingResult = await Connection.execute(
+            "SELECT numeroDocumento FROM dpiEmpleados WHERE numeroDocumento = ? AND estado = 'A';", 
+            [data.numeroDocumento]
+        );
+        
+        if (existingResult.rows.length === 1) {
+            throw {
                 codRes: 409,
                 message: "NUMERO DOCUMENTO INGRESADO YA EXISTE" 
-            }
-        }else{
-            const [result] = await Connection.query("insert into dpiEmpleados (numeroDocumento, departamentoExpedicion, municipioExpedicion, fechaVencimientoDpi) values (?, ?, ?, ?);", [data.numeroDocumento, data.departamentoExpedicion, data.municipioExpedicion, data.fechaVencimientoDpi]);
-            return result.insertId;
+            };
+        } else {
+            // Insertar nuevo documento
+            const result = await Connection.execute(
+                "INSERT INTO dpiEmpleados (numeroDocumento, departamentoExpedicion, municipioExpedicion, fechaVencimientoDpi) VALUES (?, ?, ?, ?);", 
+                [data.numeroDocumento, data.departamentoExpedicion, data.municipioExpedicion, data.fechaVencimientoDpi]
+            );
+            
+            return Number(result.lastInsertRowid);
         }
-    }catch(error){
+    } catch (error) {
+        console.log("Error en IngresarInformacionDpiDao:", error);
         throw error;
-    }finally{
-        CloseConection(Connection);
     }
-
-}
-
+};
 
 export const ConsultarDpiDao = async (numeroDocumento) => {
-    try{
-        const [dpi] = await Connection.query("select idDpi, numeroDocumento, departamentoExpedicion, municipioExpedicion, fechaVencimientoDpi, estado from dpiEmpleados where numeroDocumento = ? and estado = 'A';", [numeroDocumento]);
+    try {
+        const result = await Connection.execute(
+            "SELECT idDpi, numeroDocumento, departamentoExpedicion, municipioExpedicion, fechaVencimientoDpi, estado FROM dpiEmpleados WHERE numeroDocumento = ? AND estado = 'A';", 
+            [numeroDocumento]
+        );
        
-        if (dpi.length === 0) {
-            throw  {
+        if (result.rows.length === 0) {
+            throw {
                 codeError: 101,
                 message: "No se encontro el DPI consultado"
-            }
+            };
         }
-        return dpi; 
-    }catch(error){
+        return result.rows; 
+    } catch (error) {
+        console.log("Error en ConsultarDpiDao:", error);
         throw error;
-     }
+    }
 };

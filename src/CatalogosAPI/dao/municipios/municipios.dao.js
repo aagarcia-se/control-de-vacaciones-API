@@ -1,17 +1,11 @@
-
-import { CerraBDCatalogos, ConectarBDCatalogos } from "../ConexionB/ConexionBDC.dao.js";
-
+import { Connection } from "../ConexionB/ConexionCatSqlite.js";
 
 export const getMunicipiosDao = async () => {
-    let catalogosBD;
-    
-    try{
-        catalogosBD = await ConectarBDCatalogos();
-        const [municipios] = await catalogosBD.query("select idMunicipio, municipio, estado from municipios;");
-        return [municipios]; 
-    }catch(error){
-        return error;
-    }finally{
-        CerraBDCatalogos(catalogosBD);
+    try {
+        const result = await Connection.execute("SELECT idMunicipio, municipio, estado FROM municipios;");
+        return [result.rows];   
+    } catch (error) {
+        console.log("Error en getMunicipiosDao:", error);
+        throw error;
     }
-}
+};

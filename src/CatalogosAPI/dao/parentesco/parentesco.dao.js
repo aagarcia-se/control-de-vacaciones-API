@@ -1,17 +1,9 @@
-
-import { CerraBDCatalogos, ConectarBDCatalogos } from "../ConexionB/ConexionBDC.dao.js";
-
-
 export const getParentescoDao = async () => {
-    let catalogosBD;
-    
-    try{
-        catalogosBD = await ConectarBDCatalogos();
-        const [parentesco] = await catalogosBD.query("select idParentesco, parentesco, estado from parentescos;");
-        return [parentesco]; 
-    }catch(error){
-        return error;
-    }finally{
-        CerraBDCatalogos(catalogosBD);
+    try {
+        const result = await Connection.execute("SELECT idParentesco, parentesco, estado FROM parentescos;");
+        return [result.rows]; // Mantiene formato [parentesco]
+    } catch (error) {
+        console.log("Error en getParentescoDao:", error);
+        throw error;
     }
-}
+};

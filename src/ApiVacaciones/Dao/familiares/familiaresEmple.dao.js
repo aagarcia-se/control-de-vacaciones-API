@@ -1,16 +1,10 @@
-import { CloseConection, OpenConection } from "../Connection/ConexionV.dao.js";
-
-
+import { Connection } from "../Connection/ConexionSqlite.dao.js";
 
 export const IngresarFamiliarDao = async (data) => {
-    let connection;
     try {
-        connection = await OpenConection();
-        await connection.beginTransaction();
-
         const query = "INSERT INTO familiaresDeEmpleados (idInfoPersonal, nombreFamiliar, telefono, parentesco, fechaNacimiento) VALUES (?, ?, ?, ?, ?);";
 
-        const [result] = await connection.query(query, [
+        const result = await Connection.execute(query, [
             data.idInfoPersonal,
             data.nombreFamiliar,
             data.telefono,
@@ -18,16 +12,9 @@ export const IngresarFamiliarDao = async (data) => {
             data.fechaNacimiento,
         ]);
 
-        await connection.commit();
-        return result.insertId;
+        return Number(result.lastInsertRowid);
     } catch (error) {
-        if (connection) {
-            await connection.rollback();
-        }
+        console.log("Error en IngresarFamiliarDao:", error);
         throw error;
-    } finally {
-        if (connection) {
-            await CloseConection(connection);
-        }
     }
-}
+};

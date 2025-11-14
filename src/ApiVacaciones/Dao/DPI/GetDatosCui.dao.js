@@ -1,32 +1,24 @@
-import { CloseConection, OpenConection } from "../Connection/ConexionV.dao.js";
-
-let dbConnection;
+import { Connection } from "../Connection/ConexionSqlite.dao.js";
 
 export const obtenerInfoDPIDao = async (idDpi) => {
   try {
-    dbConnection = await OpenConection();
-    await dbConnection.beginTransaction();
-
-    const query = `select idDpi, numeroDocumento, departamentoExpedicion,
+    const query = `SELECT idDpi, numeroDocumento, departamentoExpedicion,
                     municipioExpedicion, fechaVencimientoDpi
-                    from dpiEmpleados
-                    where idDPi = ?;
-                      `;
+                    FROM dpiEmpleados
+                    WHERE idDpi = ?;`;
 
-    const [dpiData] = await dbConnection.query(query, [idDpi]);
-    if (dpiData.length === 0) {
+    const result = await Connection.execute(query, [idDpi]);
+    
+    if (result.rows.length === 0) {
       throw {
         codRes: 409,
         message: "NO EXISTE EMPLEADO CON EL ID INGRESADO",
       };
     } else {
-      return dpiData[0];
+      return result.rows[0];
     }
   } catch (error) {
+    console.log("Error en obtenerInfoDPIDao:", error);
     throw error;
-  } finally {
-    if (dbConnection) {
-      await CloseConection(dbConnection);
-    }
   }
 };

@@ -1,96 +1,73 @@
-import { CloseConection, OpenConection } from "../Connection/ConexionV.dao.js";
-
-let dbConnection;
+import { Connection } from "../Connection/ConexionSqlite.dao.js";
 
 export const registrarCoordinadorDao = async (data) => {
     try {
-        dbConnection = await OpenConection();
-        await dbConnection.beginTransaction();
-
         const queryInsert = `
-                            insert into coordinadores (idEmpleado, nombreCoordinador, 
-                            coordinadorUnidad, correoCoordinador)
-                            values (?, ?, ?, ?);
-                    `;
- 
-        const [result] = await dbConnection.query(queryInsert, [
+            INSERT INTO coordinadores (idEmpleado, nombreCoordinador, 
+            coordinadorUnidad, correoCoordinador)
+            VALUES (?, ?, ?, ?);
+        `;
+
+        const result = await Connection.execute(queryInsert, [
             data.idEmpleado,
             data.nombreCoordinador,
             data.coordinadorUnidad,
             data.correoCoordinador,
         ]);
 
-        await dbConnection.commit();
-        return result.insertId;
+        // En SQLite usamos lastInsertRowid en lugar de insertId
+        return Number(result.lastInsertRowid);
     } catch (error) {
-        if (dbConnection) {
-            await dbConnection.rollback();
-        }
+        console.log("Error en registrarCoordinadorDao:", error);
         throw error;
-    } finally {
-        if (dbConnection) {
-            await CloseConection(dbConnection);
-        }
     }
 }
 
-
 export const consultarCoordinadorDao = async (coordinadorUnidad) => {
-  try {
-    dbConnection = await OpenConection();
-    await dbConnection.beginTransaction();
+    try {
+        const query = `
+            SELECT idCoordinador, idEmpleado, nombreCoordinador, 
+            coordinadorUnidad, correoCoordinador FROM coordinadores
+            WHERE coordinadorUnidad = ?
+            AND estado = 'A';
+        `;
 
-    const query = `
-                        select idCoordinador, idEmpleado, nombreCoordinador, 
-                        coordinadorUnidad, correoCoordinador from coordinadores
-                        where coordinadorUnidad = ?
-                        and estado = 'A';
-                    `;
-
-    const [coordinador] = await dbConnection.query(query, [coordinadorUnidad]);
-    if (coordinador.length === 0) {
-      throw {
-        codRes: 409,
-        message: "NO EXISTEN REGISTROS PARA EL COORDINADOR INGRESADO",
-      };
-    } else {
-      return coordinador[0];
+        const result = await Connection.execute(query, [coordinadorUnidad]);
+        
+        if (result.rows.length === 0) {
+            throw {
+                codRes: 409,
+                message: "NO EXISTEN REGISTROS PARA EL COORDINADOR INGRESADO",
+            };
+        } else {
+            return result.rows[0];
+        }
+    } catch (error) {
+        console.log("Error en consultarCoordinadorDao:", error);
+        throw error;
     }
-  } catch (error) {
-    throw error;
-  } finally {
-    if (dbConnection) {
-      await CloseConection(dbConnection);
-    }
-  }
-};
-
+}
 
 export const consultarCoordinadoresListDao = async () => {
-  try {
-    dbConnection = await OpenConection();
-    await dbConnection.beginTransaction();
+    try {
+        const query = `
+            SELECT idCoordinador, idEmpleado, nombreCoordinador, 
+            coordinadorUnidad, correoCoordinador FROM coordinadores
+            WHERE estado = 'A';
+        `;
 
-    const query = `
-                        select idCoordinador, idEmpleado, nombreCoordinador, 
-                        coordinadorUnidad, correoCoordinador from coordinadores
-                        where estado = 'A';
-                    `;
-
-    const [coordinador] = await dbConnection.query(query);
-    if (coordinador.length === 0) {
-      throw {
-        codRes: 409,
-        message: "NO EXISTEN REGISTROS PARA EL COORDINADOR INGRESADO",
-      };
-    } else {
-      return coordinador;
+        const result = await Connection.execute(query);
+        
+        if (result.rows.length === 0) {
+            throw {
+                codRes: 409,
+                message: "NO EXISTEN REGISTROS PARA EL COORDINADOR INGRESADO",
+            };
+        } else {
+            return result.rows;
+        }
+    } catch (error) {
+        console.log("Error en consultarCoordinadoresListDao:", error);
+        throw error;
     }
-  } catch (error) {
-    throw error;
-  } finally {
-    if (dbConnection) {
-      await CloseConection(dbConnection);
-    }
-  }
-};
+}

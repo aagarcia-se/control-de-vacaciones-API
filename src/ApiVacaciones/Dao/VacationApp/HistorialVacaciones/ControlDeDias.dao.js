@@ -1,7 +1,4 @@
-import {
-  CloseConection,
-  OpenConection,
-} from "../../Connection/ConexionV.dao.js";
+import { Connection } from "../../Connection/ConexionSqlite.dao.js";
 
 /**
  * Inserta múltiples registros de vacaciones en la tabla `historial_vacaciones` para un lote de periodos.
@@ -22,14 +19,13 @@ export const acreditarDiasPorPeriodoLoteDao = async (data) => {
   if (!Array.isArray(data)) {
     throw new Error("El parámetro 'data' debe ser un arreglo de objetos.");
   }
-  let Connection;
+
   try {
-    Connection = await OpenConection();
     let contadorDeInserciones = 0;
 
     // Recorrer cada objeto dentro del array `data`
     for (const item of data) {
-      await Connection.query(
+      await Connection.execute(
         `INSERT INTO historial_vacaciones 
             (idEmpleado, idInfoPersonal, periodo, 
              diasAcreditados, diasDisponibles, 
@@ -49,25 +45,20 @@ export const acreditarDiasPorPeriodoLoteDao = async (data) => {
       contadorDeInserciones++;
     }
 
-    await Connection.commit();
     return contadorDeInserciones; // Retorna el número de inserciones realizadas
   } catch (error) {
-    if (Connection) await Connection.rollback(); // Deshacer cambios en caso de error
+    console.log("Error en acreditarDiasPorPeriodoLoteDao:", error);
     throw error;
-  } finally {
-    CloseConection(Connection);
   }
 };
 
 export const acreditarDiasPorPeriodoDao = async (data) => {
-  let Connection;
   try {
-    Connection = await OpenConection();
-    const [result] = await Connection.query(
-      `insert into historial_vacaciones  (idEmpleado, idInfoPersonal, periodo, 
+    const result = await Connection.execute(
+      `INSERT INTO historial_vacaciones  (idEmpleado, idInfoPersonal, periodo, 
                                                 diasAcreditados, diasDisponibles,
                                                 sumatoriaDias, fechaActualizacion, fechaAcreditacion)
-                                                values (?, ?, ?, ?, ?, ?, ?, ?); `,
+                                                VALUES (?, ?, ?, ?, ?, ?, ?, ?); `,
       [
         data.idEmpleado,
         data.idInfoPersonal,
@@ -79,27 +70,22 @@ export const acreditarDiasPorPeriodoDao = async (data) => {
         data.fechaAcreditacion,
       ]
     );
-    await Connection.commit();
-    return result.insertId;
+    return Number(result.lastInsertRowid);
   } catch (error) {
+    console.log("Error en acreditarDiasPorPeriodoDao:", error);
     throw error;
-  } finally {
-    CloseConection(Connection);
   }
 };
 
 export const ActualizarDiasAcumuladosPorPeriodoDao = async (data) => {
-  let Connection;
   try {
-    Connection = await OpenConection();
-    const [result] = await Connection.query(
-      `update historial_vacaciones set diasAcreditados = ?, 
+    const result = await Connection.execute(
+      `UPDATE historial_vacaciones SET diasAcreditados = ?, 
                 diasDisponibles   = ?, sumatoriaDias = ?, 
                 fechaActualizacion = ?
-                where periodo = ?
-                and idEmpleado = ?
-                and idInfoPersonal = ?;
-                                            `,
+                WHERE periodo = ?
+                AND idEmpleado = ?
+                AND idInfoPersonal = ?;`,
       [
         data.diasPeriodo,
         data.diasPeriodo,
@@ -110,47 +96,33 @@ export const ActualizarDiasAcumuladosPorPeriodoDao = async (data) => {
         data.idInfoPersonal,
       ]
     );
-    await Connection.commit();
-    return result.affectedRows;
+    return result.rowsAffected;
   } catch (error) {
+    console.log("Error en ActualizarDiasAcumuladosPorPeriodoDao:", error);
     throw error;
-  } finally {
-    CloseConection(Connection);
   }
 };
 
-
-
-
-
-let dbConnection;
-
 export const getUltiaAcreditacionDiasDao = async (idEmpleado) => {
   try {
-    dbConnection = await OpenConection();
-    await dbConnection.beginTransaction();
-
-    const query = `select idHistorial, idEmpleado, idInfoPersonal, periodo, diasAcreditados,
+    const query = `SELECT idHistorial, idEmpleado, idInfoPersonal, periodo, diasAcreditados,
                     diasDisponibles, sumatoriaDias, fechaActualizacion
-                    from historial_vacaciones
-                    where idEmpleado = ?
-                    and tipoRegistro = 1
-                    order by idHistorial desc
-                    limit 1;
-                    `;
+                    FROM historial_vacaciones
+                    WHERE idEmpleado = ?
+                    AND tipoRegistro = 1
+                    ORDER BY idHistorial DESC
+                    LIMIT 1;`;
 
-    const [ultimoIngreso] = await dbConnection.query(query, [idEmpleado]);
-    if (ultimoIngreso.length === 0) {
+    const result = await Connection.execute(query, [idEmpleado]);
+    
+    if (result.rows.length === 0) {
       return 0;
     } else {
-      return  ultimoIngreso[0];
+      return result.rows[0];
     }
   } catch (error) {
+    console.log("Error en getUltiaAcreditacionDiasDao:", error);
     throw error;
-  } finally {
-    if (dbConnection) {
-      await CloseConection(dbConnection);
-    }
   }
 };
 
@@ -158,39 +130,32 @@ export const debitarDiasPorPeriodoDao = async (data) => {
   if (!Array.isArray(data)) {
     throw new Error("El parámetro 'data' debe ser un arreglo de objetos.");
   }
-  let Connection;
+
   try {
-    Connection = await OpenConection();
     let contadorDeInserciones = 0;
 
     // Recorrer cada objeto dentro del array `data`
     for (const item of data) {
-
       const insert = `INSERT INTO historial_vacaciones (idEmpleado, idInfoPersonal, idSolicitud, periodo, diasSolicitados, diasDebitados,  diasDisponibles, fechaActualizacion, tipoRegistro) 
                               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`;
-      await Connection.query(insert,
-        [
-          item.idEmpleado,
-          item.idInfoPersonal,
-          item.idSolicitud,
-          item.anioPeriodo,
-          item.diasSolicitados,
-          item.diasDebitados,
-          item.diasDisponibles,
-          item.fechaActualizacion,
-          item.tipoRegistro,
-        ]
-      );
+      
+      await Connection.execute(insert, [
+        item.idEmpleado,
+        item.idInfoPersonal,
+        item.idSolicitud,
+        item.anioPeriodo,
+        item.diasSolicitados,
+        item.diasDebitados,
+        item.diasDisponibles,
+        item.fechaActualizacion,
+        item.tipoRegistro,
+      ]);
       contadorDeInserciones++;
     }
 
-    await Connection.commit();
     return contadorDeInserciones; // Retorna el número de inserciones realizadas
   } catch (error) {
-    if (Connection) await Connection.rollback(); // Deshacer cambios en caso de error
+    console.log("Error en debitarDiasPorPeriodoDao:", error);
     throw error;
-  } finally {
-    CloseConection(Connection);
   }
 };
-

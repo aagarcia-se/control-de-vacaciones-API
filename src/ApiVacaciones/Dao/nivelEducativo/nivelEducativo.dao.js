@@ -1,33 +1,23 @@
-import { CloseConection, OpenConection } from "../Connection/ConexionV.dao.js";
+import { Connection } from "../Connection/ConexionSqlite.dao.js";
 
 export const IngresarNivelEducativoDao = async (data) => {
-    let dbConnection;
+    console.log(data)
     try {
-        dbConnection = await OpenConection();
-        await dbConnection.beginTransaction();
-
         const query = "INSERT INTO nivelEducativo (idInfoPersonal, nivelDeEstudios, ultimoNivelAlcanzado, añoUltimoNivelCursado, Profesion, numeroColegiado, fechaColegiacion) VALUES (?, ?, ?, ?, ?, ?, ?);";
 
-        const [result] = await dbConnection.query(query, [
+        const result = await Connection.execute(query, [
             data.idInfoPersonal,
             data.nivelDeEstudios,
             data.ultimoNivelAlcanzado,
-            data.añoUltimoNivelCursado,
-            data.Profesion,
+            data.anioUltimoNivelCursado,
+            data.profesion,
             data.numeroColegiado,
-            data.fechaColegiacion
+            data.fechaColegiacionToSend
         ]);
 
-        await dbConnection.commit();
-        return result.insertId;
+        return Number(result.lastInsertRowid);
     } catch (error) {
-        if (dbConnection) {
-            await dbConnection.rollback();
-        }
+        console.log("Error en IngresarNivelEducativoDao:", error);
         throw error;
-    } finally {
-        if (dbConnection) {
-            await CloseConection(dbConnection);
-        }
     }
-}
+};

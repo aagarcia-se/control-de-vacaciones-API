@@ -1,42 +1,35 @@
-import { CloseConection, OpenConection } from "../Connection/ConexionV.dao.js";
-
-let dbConnection;
+import { Connection } from "../Connection/ConexionSqlite.dao.js";
 
 export const vacacionesReportDao = async (unidad) => {
   try {
-    dbConnection = await OpenConection();
-    await dbConnection.beginTransaction();
-
     const query = `
-                      select sv.idSolicitud, sv.idEmpleado, 
-                      concat(inf.primerNombre, ' ' , inf.segundoNombre, 
-                      '', inf.primerApellido, ' ' , inf.segundoApellido) as Nombre,
-                      sv.unidadSolicitud, sv.fechaInicioVacaciones, sv.fechaFinVacaciones,
-                      sv.fechaRetornoLabores, sv.cantidadDiasSolicitados, sv.estadoSolicitud,
-                      sv.fechaSolicitud, sv.coordinadorResolucion as coordinadorAprobo,
-                      sv.fechaResolucion as fechaAutorizacion, sv.descripcionRechazo, 
-                      sv.fechaSolicitud
-                      from solicitudes_vacaciones sv,
-                      infoPersonalEmpleados inf, empleados emp
-                      where sv.idEmpleado = emp.idEmpleado
-                      and sv.idInfoPersonal = inf.idInfoPersonal
-                      and unidadSolicitud = ?;
-                    `;
+      SELECT sv.idSolicitud, sv.idEmpleado, 
+      (inf.primerNombre || ' ' || inf.segundoNombre || 
+      ' ' || inf.primerApellido || ' ' || inf.segundoApellido) AS Nombre,
+      sv.unidadSolicitud, sv.fechaInicioVacaciones, sv.fechaFinVacaciones,
+      sv.fechaRetornoLabores, sv.cantidadDiasSolicitados, sv.estadoSolicitud,
+      sv.fechaSolicitud, sv.coordinadorResolucion AS coordinadorAprobo,
+      sv.fechaResolucion AS fechaAutorizacion, sv.descripcionRechazo, 
+      sv.fechaSolicitud
+      FROM solicitudes_vacaciones sv,
+      infoPersonalEmpleados inf, empleados emp
+      WHERE sv.idEmpleado = emp.idEmpleado
+      AND sv.idInfoPersonal = inf.idInfoPersonal
+      AND unidadSolicitud = ?;
+    `;
 
-    const [reporteVacaciones] = await dbConnection.query(query, [unidad]);
-    if (reporteVacaciones.length === 0) {
+    const result = await Connection.execute(query, [unidad]);
+    
+    if (result.rows.length === 0) {
       throw {
         codRes: 409,
         message: "NO REGISTROS PARA LOS DATOS INGRESADOS",
       };
     } else {
-      return reporteVacaciones;
+      return result.rows;
     }
   } catch (error) {
+    console.log("Error en vacacionesReportDao:", error);
     throw error;
-  } finally {
-    if (dbConnection) {
-      await CloseConection(dbConnection);
-    }
   }
 };

@@ -1,92 +1,65 @@
-import { CloseConection, OpenConection } from "../../Connection/ConexionV.dao.js";
-
-let dbConnection;
+import { Connection } from "../../Connection/ConexionSqlite.dao.js";
 
 export const obtenerHistorialPorEmpleadoDao = async (idEmpleado) => {
   try {
-    dbConnection = await OpenConection();
-    await dbConnection.beginTransaction();
-
-    const query = `select idHistorial, idEmpleado, idSolicitudCorrelativo As Gestion,
+    const query = `SELECT idHistorial, idEmpleado, idSolicitudCorrelativo AS Gestion,
                     idEmpleado, periodo, totalDiasAcreditados, diasSolicitados,
                     totalDiasDebitados, diasDisponiblesTotales, fechaAcreditacion, fechaDebito, 
                     tipoRegistro
-                    from HistorialVacaciones
-                    where idEmpleado = ?
-                    `;
+                    FROM HistorialVacaciones
+                    WHERE idEmpleado = ?`;
 
-    const [historial] = await dbConnection.query(query, [idEmpleado]);
-    if (historial.length === 0) {
+    const result = await Connection.execute(query, [idEmpleado]);
+    
+    if (result.rows.length === 0) {
       throw {
         codRes: 409,
         message: "NO EXISTE SOLICITUDES",
       };
     } else {
-      return historial;
+      return result.rows;
     }
   } catch (error) {
+    console.log("Error en obtenerHistorialPorEmpleadoDao:", error);
     throw error;
-  } finally {
-    if (dbConnection) {
-      await CloseConection(dbConnection);
-    }
   }
 };
 
 export const consultarPeriodosYDiasPorEmpeladoDao = async (idEmpleado) => {
-    try {
-      dbConnection = await OpenConection();
-      await dbConnection.beginTransaction();
-
-      const query = `SELECT periodo, MIN(diasDisponibles) AS diasDisponibles
-                    FROM historial_vacaciones 
-                    WHERE idEmpleado = ?
-                    GROUP BY periodo;`
-
-      const [periodosConDias] = await dbConnection.query(query, [idEmpleado]);
-
-      if (periodosConDias.length === 0) {
-        return  [];
-      }
-
-      await dbConnection.commit();
-
-      return periodosConDias;
-        
-    } catch (error) {
-        throw error;
-    }finally{
-      if (dbConnection) {
-        await CloseConection(dbConnection);
-      }
-    }
-}
-
-export const consultarDiasDisponiblesDeVacacacionesDao = async (idEmpleado) => {
   try {
-    dbConnection = await OpenConection();
-    await dbConnection.beginTransaction();
+    const query = `SELECT periodo, MIN(diasDisponibles) AS diasDisponibles
+                  FROM historial_vacaciones 
+                  WHERE idEmpleado = ?
+                  GROUP BY periodo;`;
 
-    const query = `select sum(diasDisponibles)diasDisponiblesT
-                      from historial_vacaciones
-                      where idEmpleado = ?;`
+    const result = await Connection.execute(query, [idEmpleado]);
 
-    const [diasDisponibles] = await dbConnection.query(query, [idEmpleado]);
-
-    if (diasDisponibles.length === 0) {
+    if (result.rows.length === 0) {
       return [];
     }
 
-    await dbConnection.commit();
-
-    return diasDisponibles[0];
-
+    return result.rows;
   } catch (error) {
+    console.log("Error en consultarPeriodosYDiasPorEmpeladoDao:", error);
     throw error;
-  } finally {
-    if (dbConnection) {
-      await CloseConection(dbConnection);
-    }
   }
-}
+};
 
+export const consultarDiasDisponiblesDeVacacacionesDao = async (idEmpleado) => {
+  try {
+    const query = `SELECT SUM(diasDisponibles) AS diasDisponiblesT
+                  FROM historial_vacaciones
+                  WHERE idEmpleado = ?;`;
+
+    const result = await Connection.execute(query, [idEmpleado]);
+
+    if (result.rows.length === 0) {
+      return { diasDisponiblesT: 0 };
+    }
+
+    return result.rows[0];
+  } catch (error) {
+    console.log("Error en consultarDiasDisponiblesDeVacacacionesDao:", error);
+    throw error;
+  }
+};
