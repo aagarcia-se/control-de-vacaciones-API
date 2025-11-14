@@ -1,17 +1,9 @@
-
-import { CerraBDCatalogos, ConectarBDCatalogos } from "../ConexionB/ConexionBDC.dao.js";
-
-
 export const getEstadoCivilDao = async () => {
-    let catalogosBD;
-    
-    try{
-        catalogosBD = await ConectarBDCatalogos();
-        const [estadosCivil] = await catalogosBD.query("select idEstadoCivil, estadoCivil, estado from estadosCivil;");
-        return [estadosCivil]; 
-    }catch(error){
-        return error;
-    }finally{
-        CerraBDCatalogos(catalogosBD);
+    try {
+        const result = await Connection.execute("SELECT idEstadoCivil, estadoCivil, estado FROM estadosCivil;");
+        return [result.rows]; // Mantiene formato [estadosCivil]
+    } catch (error) {
+        console.log("Error en getEstadoCivilDao:", error);
+        throw error;
     }
-}
+};

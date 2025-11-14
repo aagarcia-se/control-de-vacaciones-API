@@ -85,7 +85,6 @@ export const EnviarMailServices = async (data) => {
   // Enviar el correo electrónico
   try{
     const info = await transporter.sendMail(mailOptions);
-    console.log("paso 1");
     console.log("Correo electrónico enviado: " + info.response);
     return info.response;
   }catch(error){

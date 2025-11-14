@@ -486,6 +486,5 @@ export const obtenerPeriodosParaVacaciones = (historial, diasSolicitados) => {
       })),
     };
   }
-
   return resultado;
 };

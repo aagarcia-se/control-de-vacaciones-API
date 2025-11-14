@@ -1,17 +1,9 @@
-
-import { CerraBDCatalogos, ConectarBDCatalogos } from "../ConexionB/ConexionBDC.dao.js";
-
-
 export const getReligionesDao = async () => {
-    let catalogosBD;
-    
-    try{
-        catalogosBD = await ConectarBDCatalogos();
-        const [religiones] = await catalogosBD.query("select idReligion, religion, estado from religiones;");
-        return [religiones]; 
-    }catch(error){
-        return error;
-    }finally{
-        CerraBDCatalogos(catalogosBD);
+    try {
+        const result = await Connection.execute("SELECT idReligion, religion, estado FROM religiones;");
+        return [result.rows]; // Mantiene formato [religiones]
+    } catch (error) {
+        console.log("Error en getReligionesDao:", error);
+        throw error;
     }
-}
+};

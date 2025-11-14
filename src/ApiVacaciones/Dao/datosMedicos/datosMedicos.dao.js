@@ -1,14 +1,10 @@
-import { CloseConection, OpenConection } from "../Connection/ConexionV.dao.js";
+import { Connection } from "../Connection/ConexionSqlite.dao.js";
 
 export const IngresarDatosMedicosDao = async (data) => {
-    let dbConnection;
     try {
-        dbConnection = await OpenConection();
-        await dbConnection.beginTransaction();
-
         const query = "INSERT INTO datosMedicos (idInfoPersonal, discapacidad, tipoDiscapacidad, tipoSangre, condicionMedica, tomaMedicina, nombreMedicamento, sufreAlergia) VALUES (?, ?, ?, ?, ?, ?, ?, ?);";
 
-        const [result] = await dbConnection.query(query, [
+        const result = await Connection.execute(query, [
             data.idInfoPersonal,
             data.discapacidad,
             data.tipoDiscapacidad,
@@ -19,16 +15,10 @@ export const IngresarDatosMedicosDao = async (data) => {
             data.sufreAlergia
         ]);
 
-        await dbConnection.commit();
-        return result.insertId;
+        // En SQLite usamos lastInsertRowid en lugar de insertId
+        return Number(result.lastInsertRowid);
     } catch (error) {
-        if (dbConnection) {
-            await dbConnection.rollback();
-        }
+        console.log("Error en IngresarDatosMedicosDao:", error);
         throw error;
-    } finally {
-        if (dbConnection) {
-            await CloseConection(dbConnection);
-        }
     }
 }

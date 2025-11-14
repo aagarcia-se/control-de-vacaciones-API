@@ -1,20 +1,14 @@
-import { CloseConection, OpenConection } from "../Connection/ConexionV.dao.js";
-
-let dbConnection;
+import { Connection } from "../Connection/ConexionSqlite.dao.js";
 
 export const ingresarSuspensionDao = async (data) => {
-    let dbConnection;
     try {
-        dbConnection = await OpenConection();
-        await dbConnection.beginTransaction();
-
         const queryInsert = `
-                            insert into suspensiones (idEmpleado, CUI, nombreEmpleado,
-                            fechaInicioSuspension, fechaFinSuspension, descripcionSuspension)
-                            values (?, ?, ?, ?, ?, ?);
-                    `;
- 
-        const [result] = await dbConnection.query(queryInsert, [
+            INSERT INTO suspensiones (idEmpleado, CUI, nombreEmpleado,
+            fechaInicioSuspension, fechaFinSuspension, descripcionSuspension)
+            VALUES (?, ?, ?, ?, ?, ?);
+        `;
+
+        const result = await Connection.execute(queryInsert, [
             data.idEmpleado,
             data.CUI,
             data.nombreEmpleado,
@@ -23,47 +17,35 @@ export const ingresarSuspensionDao = async (data) => {
             data.descripcionSuspension
         ]);
 
-        await dbConnection.commit();
-        return result.insertId;
+        return Number(result.lastInsertRowid);
     } catch (error) {
-        if (dbConnection) {
-            await dbConnection.rollback();
-        }
+        console.log("Error en ingresarSuspensionDao:", error);
         throw error;
-    } finally {
-        if (dbConnection) {
-            await CloseConection(dbConnection);
-        }
     }
-}
+};
 
 export const GetSuspensionesDao = async () => {
-  try {
-    dbConnection = await OpenConection();
-    await dbConnection.beginTransaction();
+    try {
+        const query = `
+            SELECT idSuspension, idEmpleado, CUI, 
+            nombreEmpleado, fechaInicioSuspension, fechaFinSuspension,
+            descripcionSuspension FROM suspensiones
+            WHERE estado = 'A'
+            ORDER BY idSuspension DESC;
+        `;
 
-    const query = `
-                    select idSuspension, idEmpleado, CUI, 
-                    nombreEmpleado, fechaInicioSuspension, fechaFinSuspension,
-                    descripcionSuspension from suspensiones
-                    where estado = 'A'
-                    order by idSuspension desc;
-                    `;
-
-    const [suspensionesLaborales] = await dbConnection.query(query);
-    if (suspensionesLaborales.length === 0) {
-      throw {
-        codRes: 409,
-        message: "NO EXISTEN REGISTROS",
-      };
-    } else {
-      return suspensionesLaborales;
+        const result = await Connection.execute(query);
+        
+        if (result.rows.length === 0) {
+            throw {
+                codRes: 409,
+                message: "NO EXISTEN REGISTROS",
+            };
+        } else {
+            return result.rows;
+        }
+    } catch (error) {
+        console.log("Error en GetSuspensionesDao:", error);
+        throw error;
     }
-  } catch (error) {
-    throw error;
-  } finally {
-    if (dbConnection) {
-      await CloseConection(dbConnection);
-    }
-  }
 };

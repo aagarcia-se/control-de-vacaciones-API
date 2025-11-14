@@ -1,17 +1,11 @@
-
-import { CerraBDCatalogos, ConectarBDCatalogos } from "../ConexionB/ConexionBDC.dao.js";
-
+import { Connection } from "../ConexionB/ConexionCatSqlite.js";
 
 export const getNivelEducativoDao = async () => {
-    let catalogosBD;
-    
-    try{
-        catalogosBD = await ConectarBDCatalogos();
-        const [nivelesEducativo] = await catalogosBD.query("select idNivelEducativo, nivelEducativo, estado from nivelEducativo;");
-        return [nivelesEducativo]; 
-    }catch(error){
-        return error;
-    }finally{
-        CerraBDCatalogos(catalogosBD);
+    try {
+        const result = await Connection.execute("SELECT idNivelEducativo, nivelEducativo, estado FROM nivelEducativo;");
+        return [result.rows]; // Mantiene formato [nivelesEducativo]
+    } catch (error) {
+        console.log("Error en getNivelEducativoDao:", error);
+        throw error;
     }
-}
+};

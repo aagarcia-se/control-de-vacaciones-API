@@ -1,33 +1,24 @@
-import { CloseConection, OpenConection } from "../Connection/ConexionV.dao.js";
-
-let dbConnection;
+import { Connection } from "../Connection/ConexionSqlite.dao.js";
 
 export const obtenerFamiliaresDao = async (idEmpleado) => {
   try {
-    dbConnection = await OpenConection();
-    await dbConnection.beginTransaction();
-
-    const query = `select idFamiliar, idInfoPersonal, nombreFamiliar,
+    const query = `SELECT idFamiliar, idInfoPersonal, nombreFamiliar,
                     telefono, parentesco, fechaNacimiento
-                    from familiaresDeEmpleados
-                    where idInfoPersonal = ?; 
+                    FROM familiaresDeEmpleados
+                    WHERE idInfoPersonal = ?;`;
 
-                      `;
-
-    const [familiares] = await dbConnection.query(query, [idEmpleado]);
-    if (familiares.length === 0) {
+    const result = await Connection.execute(query, [idEmpleado]);
+    
+    if (result.rows.length === 0) {
       throw {
         codRes: 409,
         message: "NO EXISTEN FAMILIARES...",
       };
     } else {
-      return familiares;
+      return result.rows;
     }
   } catch (error) {
+    console.log("Error en obtenerFamiliaresDao:", error);
     throw error;
-  } finally {
-    if (dbConnection) {
-      await CloseConection(dbConnection);
-    }
   }
 };

@@ -1,15 +1,10 @@
-
-import { CloseConection, OpenConection } from "../Connection/ConexionV.dao.js";
+import { Connection } from "../Connection/ConexionSqlite.dao.js";
 
 export const IngresarEmpleadoDao = async (data) => {
-    let dbConnection;
     try {
-        dbConnection = await OpenConection();
-        await dbConnection.beginTransaction();
+        const query = "INSERT INTO empleados (idInfoPersonal, puesto, salario, fechaIngreso, correoInstitucional, extensionTelefonica, unidad, renglon, observaciones, coordinacion, tipoContrato, numeroCuentaCHN, numeroContrato, numeroActa, numeroAcuerdo) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
 
-        const query = "INSERT INTO empleados (idInfoPersonal, puesto, salario, fechaIngreso, correoInstitucional, extensionTelefonica, unidad, renglon, observaciones, coordinacion, tipoContrato, numeroCuentaCHN, numeroContrato, numeroActa, numeroAcuerdo ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
-
-        const [result] = await dbConnection.query(query, [
+        const result = await Connection.execute(query, [
             data.idInfoPersonal,
             data.puesto,
             data.salario,
@@ -19,7 +14,7 @@ export const IngresarEmpleadoDao = async (data) => {
             data.unidad,
             data.renglon,
             data.observaciones,
-            data.coordinancion, 
+            data.coordinacion, 
             data.tipoContrato,
             data.numeroCuentaCHN,
             data.numeroContrato,
@@ -27,16 +22,9 @@ export const IngresarEmpleadoDao = async (data) => {
             data.numeroAcuerdo
         ]);
 
-        await dbConnection.commit();
-        return result.insertId;
+        return Number(result.lastInsertRowid);
     } catch (error) {
-        if (dbConnection) {
-            await dbConnection.rollback();
-        }
+        console.log("Error en IngresarEmpleadoDao:", error);
         throw error;
-    } finally {
-        if (dbConnection) {
-            await CloseConection(dbConnection);
-        }
     }
 }

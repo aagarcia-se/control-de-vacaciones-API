@@ -1,69 +1,70 @@
-import { CloseConection, OpenConection } from "../Connection/ConexionV.dao.js";
-
+import { Connection } from "../Connection/ConexionSqlite.dao.js";
 
 export const IngresarInfoPersonalDao = async (data) => {
-    let connection;
+    console.log(data)
     try {
-        connection = await OpenConection();
-        await connection.beginTransaction();
-
-        const [existId] = await connection.query("SELECT idDpi FROM infoPersonalEmpleados WHERE idDpi = ? AND estado = 'A'", [data.idDpi]);
-        if (existId.length === 1) {
-            throw  {
+        // Verificar si el idDpi ya existe
+        const existResult = await Connection.execute(
+            "SELECT idDpi FROM infoPersonalEmpleados WHERE idDpi = ? AND estado = 'A'", 
+            [data.idDpi]
+        );
+        
+        if (existResult.rows.length === 1) {
+            throw {
                 codRes: 409,
-                meessage: "idDpi asociado a otro registro" 
-            }
+                message: "idDpi asociado a otro registro" 
+            };
         }
 
-        const [result] = await connection.query("INSERT INTO infoPersonalEmpleados (primerNombre, segundoNombre, tercerNombre, primerApellido, segundoApellido, apellidoCasada, numeroCelular, correoPersonal, direccionResidencia, idDpi, estadoCivil, Genero, departamentoNacimiento, municipioNacimiento, nit, numAfiliacionIgss, fechaNacimiento, numeroLicnecia, tipoLicencia) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", [
-            data.primerNombre,
-            data.segundoNombre,
-            data.tercerNombre,
-            data.primerApellido,
-            data.segundoApellido,
-            data.apellidoCasada,
-            data.numeroCelular,
-            data.correoPersonal,
-            data.direccionResidencia,
-            data.idDpi,
-            data.estadoCivil,
-            data.Genero,
-            data.departamentoNacimiento,
-            data.municipioNacimiento,
-            data.nit,
-            data.numAfiliacionIgss,
-            data.fechaNacimiento,
-            data.numeroLicnecia,
-            data.tipoLicencia
-        ]);
+        // Insertar nueva información personal
+        const result = await Connection.execute(
+            "INSERT INTO infoPersonalEmpleados (primerNombre, segundoNombre, tercerNombre, primerApellido, segundoApellido, apellidoCasada, numeroCelular, correoPersonal, direccionResidencia, idDpi, estadoCivil, Genero, departamentoNacimiento, municipioNacimiento, nit, numAfiliacionIgss, fechaNacimiento, numeroLicnecia, tipoLicencia) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", 
+            [
+                data.primerNombre,
+                data.segundoNombre,
+                data.tercerNombre,
+                data.primerApellido,
+                data.segundoApellido,
+                data.apellidoCasada,
+                data.numeroCelular,
+                data.correoPersonal,
+                data.direccionResidencia,
+                data.idDpi,
+                data.estadoCivil,
+                data.genero,
+                data.departamentoNacimiento,
+                data.municipioNacimiento,
+                data.nit,
+                data.numAfiliacionIgss,
+                data.fechaNacimiento,
+                data.numeroLicencia,
+                data.tipoLicencia
+            ]
+        );
 
-        await connection.commit();
-        return result.insertId;
+        return Number(result.lastInsertRowid);
     } catch (error) {
-        if (connection) {
-            await connection.rollback();
-        }
+        console.log("Error en IngresarInfoPersonalDao:", error);
         throw error;
-    } finally {
-        if (connection) {
-            await CloseConection(connection);
-        }
     }
-}
-
+};
 
 export const ObtenerNombresDao = async (idEmpleado) => {
-    let connection;
-    try{
-        connection = await OpenConection();
+    try {
+        const sql = 'SELECT ip.primerNombre, ip.segundoNombre, ip.primerApellido, ip.segundoApellido FROM infoPersonalEmpleados ip, empleados e WHERE ip.idInfoPersonal = e.idInfoPersonal AND e.idEmpleado = ?;';
 
-        const sql = 'select ip.primerNombre, ip.segundoNombre, ip.primerApellido, ip.segundoApellido from infoPersonalEmpleados ip, empleados e where ip.idInfoPersonal = e.idInfoPersonal and e.idEmpleado = ?;';
-
-        const [nombres] = await connection.query(sql, [idEmpleado]);
-        return nombres[0]; 
-    }catch(error){
-        return error;
-    }finally{
-        CloseConection(connection);
+        const result = await Connection.execute(sql, [idEmpleado]);
+        
+        if (result.rows.length === 0) {
+            throw {
+                codRes: 404,
+                message: "No se encontraron datos para el empleado"
+            };
+        }
+        
+        return result.rows[0]; 
+    } catch (error) {
+        console.log("Error en ObtenerNombresDao:", error);
+        throw error;
     }
-}
+};

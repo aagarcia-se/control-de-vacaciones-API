@@ -1,29 +1,18 @@
-import { CloseConection, OpenConection } from "../Connection/ConexionV.dao.js";
+import { Connection } from "../Connection/ConexionSqlite.dao.js";
 
 export const IngresarPertenenciaSoLi = async (data) => {
-    let dbConnection;
     try {
-        dbConnection = await OpenConection();
-        await dbConnection.beginTransaction();
-
         const query = "INSERT INTO pertenenciaSociolinguistica (idInfoPersonal, etnia, comunidadLinguistica) VALUES (?, ?, ?);";
 
-        const [result] = await dbConnection.query(query, [
+        const result = await Connection.execute(query, [
             data.idInfoPersonal,
             data.etnia,
             data.comunidadLinguistica
         ]);
 
-        await dbConnection.commit();
-        return result.insertId;
+        return Number(result.lastInsertRowid);
     } catch (error) {
-        if (dbConnection) {
-            await dbConnection.rollback();
-        }
+        console.log("Error en IngresarPertenenciaSoLi:", error);
         throw error;
-    } finally {
-        if (dbConnection) {
-            await CloseConection(dbConnection);
-        }
     }
-}
+};
