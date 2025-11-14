@@ -59,7 +59,6 @@ export const debitarDiasPorPeriodoService = async (datosSolicitud) => {
       const diasPorPeriodo = obtenerPeriodosParaVacaciones(periodos, datosSolicitud.cantidadDiasSolicitados);
 
       const payload = diasPorPeriodo.map((periodo) => {
-        if (periodo.diasDisponibles > 0) {
           return {
             idEmpleado: datosSolicitud.idEmpleado,
             idInfoPersonal: datosSolicitud.idInfoPersonal,
@@ -71,7 +70,6 @@ export const debitarDiasPorPeriodoService = async (datosSolicitud) => {
             fechaActualizacion: dayjs().format("YYYY-MM-DD"),
             tipoRegistro: 2,
           };
-        }
       });
 
       const resultado = await debitarDiasPorPeriodoDao(payload);
@@ -89,7 +87,7 @@ export const debitarDiasPorPeriodoService = async (datosSolicitud) => {
       return resultado;
     }
 
-    return 0;
+    // return 0;
   } catch (error) {
     console.error("Error en la debitura de días acumulados:", error);
     throw error;
