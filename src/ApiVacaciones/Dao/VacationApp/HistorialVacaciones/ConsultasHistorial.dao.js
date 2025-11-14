@@ -45,11 +45,33 @@ export const consultarPeriodosYDiasPorEmpeladoDao = async (idEmpleado) => {
   }
 };
 
-export const consultarDiasDisponiblesDeVacacacionesDao = async (idEmpleado) => {
+export const consultarDiasDebitadosPorAnioDao = async (idEmpleado, anio) => {
   try {
-    const query = `SELECT SUM(diasDisponibles) AS diasDisponiblesT
-                  FROM historial_vacaciones
-                  WHERE idEmpleado = ?;`;
+    const query = `SELECT COALESCE(SUM(diasDebitados), 0) as diasDebitados 
+                    FROM historial_vacaciones 
+                    WHERE idEmpleado = ?
+                    AND strftime('%Y', fechaActualizacion) = ?
+                    AND tipoRegistro = 2;`;
+
+    const result = await Connection.execute(query, [idEmpleado, anio]);
+
+    if (result.rows.length === 0) {
+      return { diasDisponiblesT: 0 };
+    }
+
+    return result.rows[0];
+  } catch (error) {
+    console.log("Error en consultarDiasDisponiblesDeVacacacionesDao:", error);
+    throw error;
+  }
+};
+
+export const consultarDiasDisponiblesDao = async (idEmpleado) => {
+  try {
+    const query = `SELECT COALESCE(SUM(diasDisponibles), 0) as diasDisponibles 
+                    FROM historial_vacaciones 
+                    WHERE idEmpleado = ? 
+                    AND tipoRegistro = 1;`;
 
     const result = await Connection.execute(query, [idEmpleado]);
 
@@ -59,7 +81,7 @@ export const consultarDiasDisponiblesDeVacacacionesDao = async (idEmpleado) => {
 
     return result.rows[0];
   } catch (error) {
-    console.log("Error en consultarDiasDisponiblesDeVacacacionesDao:", error);
+    console.log("Error en consultarDiasDisponiblesDao:", error);
     throw error;
   }
 };
