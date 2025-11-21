@@ -14,7 +14,7 @@ export const IngresarEmpleadoDao = async (data) => {
             data.unidad,
             data.renglon,
             data.observaciones,
-            data.coordinacion, 
+            data.coordinacion,
             data.tipoContrato,
             data.numeroCuentaCHN,
             data.numeroContrato,
@@ -29,21 +29,56 @@ export const IngresarEmpleadoDao = async (data) => {
     }
 }
 
-export const consultarEmpleadosUltimoAnioDao = async (anioEnCurso) => {
+export const consultarEmpleadosUltimoAnioDao = async (idEmpleado) => {
     try {
-        const query = `select e.idEmpleado, e.idInfoPersonal, 
-                        concat(i.primernombre, ' ', i.segundoNombre, ' ', i.primerApellido, ' ', i.segundoApellido)Nombre
-                        from empleados e
-                            inner join infoPersonalEmpleados i on e.idInfoPersonal = i.idInfoPersonal
-                        where fechaIngreso between date(?, '-1 year') AND date(?);`;
+        const query = `WITH params AS (SELECT ? AS idEmpleadoFiltro),
+                       ultimo_balance_por_periodo AS (
+                        SELECT 
+                            idEmpleado,
+                            periodo,
+                            diasDisponibles
+                        FROM historial_vacaciones hv1
+                        WHERE idHistorial = (
+                            SELECT MAX(idHistorial)
+                            FROM historial_vacaciones hv2
+                            WHERE hv2.idEmpleado = hv1.idEmpleado 
+                            AND hv2.periodo = hv1.periodo
+                            AND hv2.estado = 'A'
+                        )
+                    ),
+                    empleados_filtrados AS (
+                        SELECT 
+                            u.idEmpleado,
+                            ipe.primerNombre || ' ' || 
+                            COALESCE(ipe.segundoNombre || ' ', '') ||
+                            COALESCE(ipe.tercerNombre || ' ', '') ||
+                            ipe.primerApellido || ' ' || 
+                            COALESCE(ipe.segundoApellido, '') AS Nombre,
+                            u.periodo,
+                            u.diasDisponibles
+                        FROM ultimo_balance_por_periodo u
+                        INNER JOIN empleados e ON u.idEmpleado = e.idEmpleado
+                        INNER JOIN infoPersonalEmpleados ipe ON e.idInfoPersonal = ipe.idInfoPersonal
+                        CROSS JOIN params p
+                        WHERE (p.idEmpleadoFiltro = '' OR u.idEmpleado = p.idEmpleadoFiltro)
+                    )
+                    SELECT 
+                        ef.idEmpleado,
+                        ef.Nombre
+                    FROM empleados_filtrados ef
+                    GROUP BY ef.idEmpleado, ef.Nombre
+                    HAVING SUM(CASE WHEN ef.periodo < strftime('%Y', 'now') THEN ef.diasDisponibles ELSE 0 END) = 0
+                    AND SUM(CASE WHEN ef.periodo = strftime('%Y', 'now') THEN ef.diasDisponibles ELSE 0 END) > 0;`;
 
-        const result = await Connection.execute(query, [anioEnCurso, anioEnCurso]);
+        const result = await Connection.execute(query, [idEmpleado]);
 
         if (result.rows.length === 0) {
-            throw {
-                codRes: 409,
-                message: "NO EXISTE EMPLEADO EN EL ULTIMO AÑO",
-            };
+
+            const payload = {
+                        idEmpleado: 0
+            }
+
+            return [payload];
         } else {
             return result.rows;
         }

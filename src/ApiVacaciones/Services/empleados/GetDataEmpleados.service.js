@@ -22,9 +22,9 @@ export const obtenerDatosLaboralesServices = async (idInfoPersonal) => {
       }
     }
 
-export const consultarEmpleadosUltimoAnioServices = async (anioEnCurso) => {
+export const consultarEmpleadosUltimoAnioServices = async (idEmpleado) => {
     try{
-          const empleadosUltimoAnio = await consultarEmpleadosUltimoAnioDao(anioEnCurso);
+          const empleadosUltimoAnio = await consultarEmpleadosUltimoAnioDao(idEmpleado);
           return empleadosUltimoAnio;
     }catch(error){
        throw error;
