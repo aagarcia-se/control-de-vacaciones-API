@@ -239,10 +239,28 @@ CREATE TABLE `suspensiones` (
 );
 
 -- Tabla principal de parámetros
+DROP TABLE IF EXISTS `config_params`;
 CREATE TABLE IF NOT EXISTS config_params (
     idParam INTEGER PRIMARY KEY AUTOINCREMENT,
     servicio TEXT NOT NULL,
     descripcion TEXT NOT NULL,
     valor TEXT NOT NULL,
     estado TEXT NOT NULL DEFAULT 'A',
+);
+
+DROP TABLE IF EXISTS vacaciones_especiales;
+CREATE TABLE IF NOT EXISTS vacaciones_especiales (
+    idVacacionesEspeciales INTEGER PRIMARY KEY AUTOINCREMENT,
+    idEmpleado INTEGER,
+    idInfoPersonal INTEGER,
+    idUsuario INTEGER,
+    flagAutorizacion INTEGER DEFAULT 1,
+    fechaInicioValidez DATE,
+    fechaFinValidez DATE,
+    idSolicitud INTEGER,
+    fechaIngresoGestion DATETIME,
+    estado TEXT NOT NULL DEFAULT 'A',
+    FOREIGN KEY (idEmpleado) REFERENCES empleados(idEmpleado) ON DELETE CASCADE,
+    FOREIGN KEY (idInfoPersonal) REFERENCES infoPersonalEmpleados(idInfoPersonal) ON DELETE CASCADE,
+    FOREIGN KEY (idUsuario) REFERENCES usuarios(idUsuario) ON DELETE CASCADE
 );

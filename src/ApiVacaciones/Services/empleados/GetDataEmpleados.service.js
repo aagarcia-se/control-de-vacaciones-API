@@ -1,3 +1,4 @@
+import { consultarEmpleadosUltimoAnioDao } from "../../Dao/empleados/empleados.dao.js";
 import { employeesListDao, obtenerDatosLaboralesDao } from "../../Dao/empleados/GetDataEmpleados.dao.js";
 
 export const employeesListServices = async () => {
@@ -11,7 +12,7 @@ export const employeesListServices = async () => {
   }
 
 
-  export const obtenerDatosLaboralesServices = async (idInfoPersonal) => {
+export const obtenerDatosLaboralesServices = async (idInfoPersonal) => {
       try{
             const datosLaborales = await obtenerDatosLaboralesDao(idInfoPersonal);
             return datosLaborales;
@@ -20,3 +21,13 @@ export const employeesListServices = async () => {
    
       }
     }
+
+export const consultarEmpleadosUltimoAnioServices = async (anioEnCurso) => {
+    try{
+          const empleadosUltimoAnio = await consultarEmpleadosUltimoAnioDao(anioEnCurso);
+          return empleadosUltimoAnio;
+    }catch(error){
+       throw error;
+ 
+    }
+}
