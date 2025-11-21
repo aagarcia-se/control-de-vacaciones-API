@@ -1,4 +1,4 @@
-import { employeesListServices, obtenerDatosLaboralesServices } from "../../Services/empleados/GetDataEmpleados.service.js";
+import { consultarEmpleadosUltimoAnioServices, employeesListServices, obtenerDatosLaboralesServices } from "../../Services/empleados/GetDataEmpleados.service.js";
 
 
 export const employeesListController = async (req, res) => {
@@ -34,6 +34,24 @@ export const obtenerDatosLaboralesController = async (req, res) => {
         };
         res.status(200).json(responseData);
         
+    }catch(error){
+        const codRes = error?.codRes || 500;
+        const responseData = error?.message || error;
+        responseData.status;
+        res.status(codRes).json({ responseData });
+    }
+}
+
+export const consultarEmpleadosUltimoAnioController = async (req, res) => {
+    const { anioEnCurso } = req.query; 
+    try {
+        const empleadosUltimoAnio = await consultarEmpleadosUltimoAnioServices(anioEnCurso);
+        const responseData = {
+            status: 200,
+            message: "Empleados encontrados correctamente",
+            empleadosUltimoAnio
+        };
+        res.status(200).json(responseData);
     }catch(error){
         const codRes = error?.codRes || 500;
         const responseData = error?.message || error;
