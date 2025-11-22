@@ -49,6 +49,7 @@ export const consultarEmpleadosUltimoAnioDao = async (idEmpleado) => {
                     empleados_filtrados AS (
                         SELECT 
                             u.idEmpleado,
+                            ipe.idInfoPersonal,
                             ipe.primerNombre || ' ' || 
                             COALESCE(ipe.segundoNombre || ' ', '') ||
                             COALESCE(ipe.tercerNombre || ' ', '') ||
@@ -64,6 +65,7 @@ export const consultarEmpleadosUltimoAnioDao = async (idEmpleado) => {
                     )
                     SELECT 
                         ef.idEmpleado,
+                        ef.idInfoPersonal,
                         ef.Nombre
                     FROM empleados_filtrados ef
                     GROUP BY ef.idEmpleado, ef.Nombre
