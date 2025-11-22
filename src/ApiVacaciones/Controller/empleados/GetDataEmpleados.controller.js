@@ -43,9 +43,9 @@ export const obtenerDatosLaboralesController = async (req, res) => {
 }
 
 export const consultarEmpleadosUltimoAnioController = async (req, res) => {
-    const { anioEnCurso } = req.query; 
+    const { idEmpleado } = req.query; 
     try {
-        const empleadosUltimoAnio = await consultarEmpleadosUltimoAnioServices(anioEnCurso);
+        const empleadosUltimoAnio = await consultarEmpleadosUltimoAnioServices(idEmpleado || '');
         const responseData = {
             status: 200,
             message: "Empleados encontrados correctamente",

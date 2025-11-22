@@ -1,6 +1,7 @@
 import { Router } from "express";
-import { registrarVacacionesEspecialesController } from "./vacacionesespeciaels.controller.js";
+import { consultarGestionVacacionesEspecialesController, registrarVacacionesEspecialesController } from "./vacacionesespeciaels.controller.js";
 
 export const vacacionesespecialesRoute = Router();
 
 vacacionesespecialesRoute.post('/registrarVacacionesEspeciales', registrarVacacionesEspecialesController);
+vacacionesespecialesRoute.get('/consultarVacacionesEspeciales', consultarGestionVacacionesEspecialesController);
