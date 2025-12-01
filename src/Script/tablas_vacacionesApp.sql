@@ -255,6 +255,7 @@ CREATE TABLE IF NOT EXISTS vacaciones_especiales (
     idInfoPersonal INTEGER,
     idUsuario INTEGER,
     flagAutorizacion INTEGER DEFAULT 1,
+    descripcion TEXT,
     fechaInicioValidez DATE,
     fechaFinValidez DATE,
     idSolicitud INTEGER,
