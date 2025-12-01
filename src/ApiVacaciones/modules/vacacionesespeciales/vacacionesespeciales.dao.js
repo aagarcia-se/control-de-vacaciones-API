@@ -5,8 +5,8 @@ export const registrarVacacionesEspecialesDao = async (data) => {
     try {
         const queryInsert = `
             INSERT INTO vacaciones_especiales (idEmpleado, idInfoPersonal, 
-            idUsuario, flagAutorizacion, fechaInicioValidez, fechaFinValidez, fechaIngresoGestion)
-            VALUES (?, ?, ?, ?, ?, ?, ?);
+            idUsuario, flagAutorizacion, descripcion, fechaInicioValidez, fechaFinValidez, fechaIngresoGestion)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?);
         `;
 
         const result = await Connection.execute(queryInsert, [
@@ -14,6 +14,7 @@ export const registrarVacacionesEspecialesDao = async (data) => {
             data.idInfoPersonal,
             data.idUsuario,
             data.flagAutorizacion,
+            data.descripcion,
             data.fechaInicioValidez,
             data.fechaFinValidez,
             data.fechaIngresoGestion,
