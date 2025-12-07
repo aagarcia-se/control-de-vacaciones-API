@@ -8,9 +8,9 @@ export const getSolicitudesByIdDao = async (idEmpleado, idInfoPersonal) => {
                     coordinadorResolucion, fechaResolucion, descripcionRechazo 
                     FROM solicitudes_vacaciones
                     WHERE idEmpleado = ?
-                    AND idInfoPersonal = ?
-                    AND estado = 'A' 
-                    ORDER BY idSolicitud DESC
+                    and idInfoPersonal = ?  
+  					        AND estadoSolicitud = 'autorizadas'
+                    ORDER BY date(fechaInicioVacaciones) asc
                     LIMIT 1;`;
 
     const result = await Connection.execute(query, [idEmpleado, idInfoPersonal]);
@@ -54,5 +54,32 @@ export const getSolicitudesByIdSolcitudDao = async (idSolicitud, idEmpleado) => 
   } catch (error) {
     console.log("Error en getSolicitudesByIdSolcitudDao:", error);
     throw error;
+  }
+};
+
+export const consultarSolicitudesPorEmpleadoDao = async (idEmpleado) => {
+  try {
+    const query = `SELECT idSolicitud, idEmpleado, idInfoPersonal, unidadSolicitud,
+                    fechaInicioVacaciones, fechaFinVacaciones, fechaRetornoLabores, 
+                    cantidadDiasSolicitados, estadoSolicitud, fechaSolicitud,
+                    coordinadorResolucion, fechaResolucion, descripcionRechazo, 
+  					        estado
+                    FROM solicitudes_vacaciones
+                    WHERE idEmpleado = ?
+                    ORDER BY idSolicitud DESC;`;
+
+    const result = await Connection.execute(query, [idEmpleado]);
+    
+    if (result.rows.length === 0) {
+      throw {
+        codRes: 204,
+        message: "NO EXISTE SOLICITUDES",
+      };
+    } else {
+      return result.rows;
+    }
+  } catch (error) {
+    console.log("Error en consultarSolicitudesPorEmpleadoDao:", error);
+    throw error;  
   }
 };
