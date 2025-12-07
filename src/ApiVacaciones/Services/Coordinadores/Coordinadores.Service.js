@@ -12,9 +12,9 @@ export const registrarCoordinadorServices = async (data) => {
     }
   }
 
-export const consultarCoordinadorService = async (coordinadorUnidad) => {
+export const consultarCoordinadorService = async (idCoordinador) => {
     try{
-          const coordinador = await consultarCoordinadorDao(coordinadorUnidad);
+          const coordinador = await consultarCoordinadorDao(idCoordinador);
           return coordinador;
     }catch(error){
        throw error;

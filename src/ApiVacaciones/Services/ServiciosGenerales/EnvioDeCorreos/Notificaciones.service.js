@@ -9,7 +9,7 @@ import { obtenerPeriodosParaVacaciones } from "../../VacationApp/HisotrialVacaci
 export const notificarSolicitudVacacionesIngresada = async (data) => {
   try {
     //Consultar Coordinador
-    const coordinador = await consultarCoordinadorService(data.unidadSolicitud);
+    const coordinador = await consultarCoordinadorService(data.idCoordinador);
 
     //Consultar datos del empleado desde la solicitud ingresada
     const infoEmpleado = await getSolicitudesByIdSolcitudDao(data.idSolicitud,data.idEmpleado);

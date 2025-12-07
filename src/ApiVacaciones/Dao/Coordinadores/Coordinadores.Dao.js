@@ -23,16 +23,16 @@ export const registrarCoordinadorDao = async (data) => {
     }
 }
 
-export const consultarCoordinadorDao = async (coordinadorUnidad) => {
+export const consultarCoordinadorDao = async (idCoordinador) => {
     try {
         const query = `
             SELECT idCoordinador, idEmpleado, nombreCoordinador, 
             coordinadorUnidad, correoCoordinador FROM coordinadores
-            WHERE coordinadorUnidad = ?
+            WHERE idCoordinador = ?
             AND estado = 'A';
         `;
 
-        const result = await Connection.execute(query, [coordinadorUnidad]);
+        const result = await Connection.execute(query, [idCoordinador]);
         
         if (result.rows.length === 0) {
             throw {

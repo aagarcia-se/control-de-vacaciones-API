@@ -1,4 +1,4 @@
-import { getSolicitudesByIdDao } from "../../Dao/VacationApp/GetSolicitudById.Dao.js";
+import { consultarSolicitudesPorEmpleadoDao, getSolicitudesByIdDao } from "../../Dao/VacationApp/GetSolicitudById.Dao.js";
 
 
 export const getSolicitudesByIdServices = async (idEmpleado, idInfoPersonal) => {
@@ -10,3 +10,12 @@ export const getSolicitudesByIdServices = async (idEmpleado, idInfoPersonal) => 
  
     }
   }
+
+export const consultarSolicitudesPorEmpleadoServices = async (idEmpleado) => {
+  try{
+    const solicitudes = await consultarSolicitudesPorEmpleadoDao(idEmpleado);
+    return solicitudes;
+  }catch(error){
+    throw error;
+  }
+}
