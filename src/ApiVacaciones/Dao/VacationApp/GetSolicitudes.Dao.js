@@ -1,6 +1,6 @@
 import { Connection } from "../Connection/ConexionSqlite.dao.js";
 
-export const getSolicitudesDao = async (unidadSolicitud) => {
+export const getSolicitudesDao = async (idCoordinador) => {
   try {
     const query = `SELECT 
                         sl.idSolicitud, sl.idEmpleado,  sl.idInfoPersonal, 
@@ -12,10 +12,10 @@ export const getSolicitudesDao = async (unidadSolicitud) => {
                     JOIN 
                         infoPersonalEmpleados inf ON sl.idInfoPersonal = inf.idInfoPersonal
                     WHERE 
-                        unidadSolicitud = ?;
+                        idCoordinador = ?;
                     `;
 
-    const result = await Connection.execute(query, [unidadSolicitud]);
+    const result = await Connection.execute(query, [idCoordinador]);
     
     if (result.rows.length === 0) {
       throw {

@@ -185,6 +185,7 @@ CREATE TABLE `solicitudes_vacaciones` (
   `idSolicitud` INTEGER PRIMARY KEY AUTOINCREMENT,
   `idEmpleado` INTEGER NOT NULL,
   `idInfoPersonal` INTEGER NOT NULL,
+  `idCoordinador` INTEGER NOT NULL,
   `unidadSolicitud` TEXT NOT NULL,
   `fechaInicioVacaciones` DATE NOT NULL,
   `fechaFinVacaciones` DATE NOT NULL,
