@@ -2,13 +2,14 @@ import { Connection } from "../Connection/ConexionSqlite.dao.js";
 
 export const IngresarSolicitudDao = async (data) => {
     try {
-        const result = await Connection.execute(`INSERT INTO solicitudes_vacaciones (idEmpleado, idInfoPersonal, 
+        const result = await Connection.execute(`INSERT INTO solicitudes_vacaciones (idEmpleado, idInfoPersonal, idCoordinador, 
                                                 unidadSolicitud, fechaInicioVacaciones, fechaFinVacaciones, 
                                                 fechaRetornoLabores, cantidadDiasSolicitados)
                                                  VALUES 
-                                                 (?, ?, ?, ?, ?, ?, ?);`, 
+                                                 (?, ?, ?, ?, ?, ?, ?, ?);`, 
             [data.idEmpleado,
              data.idInfoPersonal,
+             data.idCoordinador,
              data.unidadSolicitud, 
              data.fechaInicioVacaciones,
              data.fechaFinVacaciones,

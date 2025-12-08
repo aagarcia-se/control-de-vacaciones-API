@@ -9,8 +9,7 @@ export const getSolicitudesByIdDao = async (idEmpleado, idInfoPersonal) => {
                     FROM solicitudes_vacaciones
                     WHERE idEmpleado = ?
                     and idInfoPersonal = ?  
-  					        AND estadoSolicitud = 'autorizadas'
-                    ORDER BY date(fechaInicioVacaciones) asc
+                    ORDER BY idSolicitud desc
                     LIMIT 1;`;
 
     const result = await Connection.execute(query, [idEmpleado, idInfoPersonal]);

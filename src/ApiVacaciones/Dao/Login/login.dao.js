@@ -2,14 +2,24 @@ import { Connection } from "../Connection/ConexionSqlite.dao.js";
 
 export const getLoginDataDao = async (data) => {
     try {
-        const query = `SELECT dp.idDpi, ip.idInfoPersonal, em.idEmpleado, 
-                      ip.primerNombre, ip.primerApellido, dp.numeroDocumento, 
-                      us.usuario, us.idRol, em.unidad, em.fechaIngreso
-                      FROM usuarios us, dpiEmpleados dp, infoPersonalEmpleados ip, empleados em 
-                      WHERE dp.idDpi = ip.idDpi 
-                      AND ip.idInfoPersonal = em.idInfoPersonal 
-                      AND em.idEmpleado = us.idEmpleado
-                      AND us.usuario = ? AND us.pass = ?`;
+        const query = `SELECT dp.idDpi, 
+                        ip.idInfoPersonal, 
+                        em.idEmpleado, 
+                        ip.primerNombre, 
+                        ip.primerApellido, 
+                        dp.numeroDocumento, 
+                        us.usuario, 
+                        us.idRol, 
+                        em.unidad, 
+                        em.fechaIngreso,
+                        co.idCoordinador
+                    FROM usuarios us
+                    INNER JOIN empleados em ON us.idEmpleado = em.idEmpleado
+                    INNER JOIN infoPersonalEmpleados ip ON em.idInfoPersonal = ip.idInfoPersonal
+                    INNER JOIN dpiEmpleados dp ON ip.idDpi = dp.idDpi
+                    LEFT JOIN coordinadores co ON em.idEmpleado = co.idEmpleado AND co.estado = 'A'
+                    WHERE us.usuario = ? 
+                    AND us.pass = ?;`;
         
         const result = await Connection.execute(query, [data.usuario, data.pass]);
         
