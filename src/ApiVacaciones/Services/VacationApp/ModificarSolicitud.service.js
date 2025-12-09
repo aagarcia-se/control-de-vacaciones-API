@@ -63,7 +63,7 @@ export const actualizarEstadoSolicitudService = async (data) => {
     const solicitud = await getSolicitudesByIdSolcitudDao(data.idSolicitud,data.idEmpleado);
   
     //Consultar Datos coordinador
-    const coordinador = await consultarCoordinadorService(solicitud.unidadSolicitud);
+    const coordinador = await consultarCoordinadorService(solicitud.idCoordinador);
 
     const solicitudCompleta = {...solicitud, ...coordinador, ...data}
 

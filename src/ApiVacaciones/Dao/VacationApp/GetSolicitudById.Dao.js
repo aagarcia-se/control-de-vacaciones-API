@@ -33,7 +33,7 @@ export const getSolicitudesByIdSolcitudDao = async (idSolicitud, idEmpleado) => 
     const query = `SELECT sl.idSolicitud, (inf.primerNombre || ' ' || inf.segundoNombre || 
                   ' ' || inf.primerApellido || ' ' || inf.segundoApellido) AS nombreCompleto, inf.correoPersonal,
                   emp.puesto, sl.unidadSolicitud, sl.cantidadDiasSolicitados, sl.fechaInicioVacaciones, 
-                  sl.fechaFinVacaciones, sl.fechaRetornoLabores
+                  sl.fechaFinVacaciones, sl.fechaRetornoLabores, sl.idCoordinador
                   FROM solicitudes_vacaciones sl, infoPersonalEmpleados inf, empleados emp
                   WHERE sl.idInfoPersonal = inf.idInfoPersonal
                   AND sl.idEmpleado = emp.idEmpleado
