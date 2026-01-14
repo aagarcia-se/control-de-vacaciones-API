@@ -226,3 +226,31 @@ export const formatearFecha = (fecha) => {
 export const formatDateToDisplay = (date) => {
   return dayjs(date).format("DD/MM/YYYY");
 }
+
+
+/**
+ * Calcula la cantidad de años transcurridos desde una fecha dada hasta la fecha actual.
+ *
+ * @param {string|Date} fecha - La fecha de referencia en formato de cadena o como objeto Date.
+ * @returns {number} - La cantidad de años transcurridos desde la fecha dada hasta la fecha actual.
+ * @throws {Error} - Si la fecha dada no es válida o si es una fecha futura.
+ */
+export const calcularAniosPasados = (fecha) => {
+    const fechaActual = dayjs();
+    const fechaDada = dayjs(fecha);
+    
+    // Verificar que la fecha sea válida
+    if (!fechaDada.isValid()) {
+        throw new Error('Fecha no válida');
+    }
+    
+    // Verificar que la fecha dada no sea futura
+    if (fechaDada.isAfter(fechaActual)) {
+        throw new Error('La fecha no puede ser futura');
+    }
+    
+    // Calcular la diferencia en años
+    const aniosPasados = fechaActual.diff(fechaDada, 'year');
+    
+    return aniosPasados;
+}

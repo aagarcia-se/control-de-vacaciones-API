@@ -1,145 +1,276 @@
 import PDFDocument from "pdfkit";
 import path from "path";
 import { fileURLToPath } from "url";
-import { formatDateToDisplay } from "../Utils/DateUtils.js";
+import { calcularAniosPasados, formatDateToDisplay } from "../Utils/DateUtils.js";
+import dayjs from "dayjs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 export const generateVacationRequestPDF = async (employeeData, diasPorPeriodo) => {
+
+  const aniosAntiguedad = calcularAniosPasados(employeeData.fechaIngreso);
+
   return new Promise((resolve, reject) => {
-    const doc = new PDFDocument({ margin: 60 });
+    const doc = new PDFDocument({ 
+      margin: 50,
+      size: 'LETTER'
+    });
     const chunks = [];
 
     doc.on("data", chunk => chunks.push(chunk));
     doc.on("end", () => resolve(Buffer.concat(chunks)));
     doc.on("error", err => reject(err));
 
-    /* =====================================================
-       ENCABEZADO
-    ===================================================== */
-    doc.font("Helvetica-Bold").fontSize(14)
-      .text("CONSEJO NACIONAL DE ADOPCIONES", { align: "center" });
-    doc.text("UNIDAD RECURSOS HUMANOS", { align: "center" });
-
-    doc.moveDown(1);
+    // Obtener mes y año actuales con dayjs
+    const currentMonth = dayjs().month() + 1; // dayjs().month() devuelve 0-11
+    const currentYear = dayjs().year();
+    const numeroBoleta = `CNA-URRHH-${currentMonth}-${currentYear}`;
 
     /* =====================================================
-       TÍTULO
+       LOGO
     ===================================================== */
-    doc.fontSize(12).text(
-      `BOLETA DE SOLICITUD DE VACACIONES No. ${employeeData.numeroBoleta}`,
-      { align: "center" }
-    );
+    const logoPath = path.join(__dirname, "..", "..", "..", "assets", "image.png");
+    try {
+      doc.image(logoPath, 50, 40, { width: 47, height: 42 });
+    } catch (err) {
+      console.warn("Logo no encontrado:", err.message);
+    }
 
-    doc.moveDown(1);
+    /* =====================================================
+       ENCABEZADO CENTRADO
+    ===================================================== */
+    doc.font("Helvetica-Bold").fontSize(12)
+      .text("CONSEJO NACIONAL DE ADOPCIONES", 0, 50, { 
+        align: "center",
+        width: doc.page.width 
+      });
+    
+    doc.font("Helvetica-Bold").fontSize(11)
+      .text("UNIDAD RECURSOS HUMANOS", 0, 67, { 
+        align: "center",
+        width: doc.page.width 
+      });
+
+    /* =====================================================
+       TÍTULO CENTRADO
+    ===================================================== */
+    doc.font("Helvetica-Bold").fontSize(11)
+      .text(
+        `BOLETA DE SOLICITUD DE VACACIONES No. ${numeroBoleta}`,
+        0, 90,
+        { 
+          align: "center",
+          width: doc.page.width 
+        }
+      );
 
     /* =====================================================
        FECHA
     ===================================================== */
     doc.font("Helvetica").fontSize(11)
-      .text(`Guatemala, ${formatDateToDisplay(employeeData.fechaSolicitud)}`, {
-        align: "right"
-      });
-
-    doc.moveDown(1.5);
+      .text(
+        `Guatemala, ${formatDateToDisplay(employeeData.fechaSolicitud)}`,
+        50, 115,
+        { align: "left" }
+      );
 
     /* =====================================================
        DATOS DEL TRABAJADOR
     ===================================================== */
-    doc.font("Helvetica-Bold").fontSize(11).text("Datos del trabajador:");
-    doc.moveDown(0.5);
+    const startY = 140;
+    doc.font("Helvetica-Bold").fontSize(11)
+      .text("Datos del trabajador:", 50, startY);
 
-    const field = (label, value) => {
-      doc.font("Helvetica").text(label, { continued: true });
-      doc.font("Helvetica-Bold").text(value || "—");
-      doc.moveDown(0.3);
+    let currentY = startY + 18;
+
+    const addField = (label, value) => {
+      doc.font("Helvetica-Bold").fontSize(11).text(label, 50, currentY, { continued: true });
+      doc.font("Helvetica").text(value || "—");
+      currentY += 16;
     };
 
-    field("Nombre completo: ", employeeData.nombreCompleto);
-    field("Puesto: ", employeeData.puesto);
-    field("Ubicación Funcional: ", employeeData.unidadSolicitud);
-    field("Renglón Presupuestario: ", employeeData.renglon);
-    field("Fecha de Ingreso: ", formatDateToDisplay(employeeData.fechaIngreso));
-    field("Años de Antigüedad: ", employeeData.antiguedad);
+    addField("Nombre completo: ", employeeData.nombreCompleto);
+    addField("Puesto: ", employeeData.puesto);
+    
+    // Ubicación Funcional con manejo de texto largo
+    doc.font("Helvetica-Bold").fontSize(11).text("Ubicación Funcional: ", 50, currentY, { continued: true });
+    doc.font("Helvetica").text(employeeData.unidadSolicitud || "—", { width: 450 });
+    currentY = doc.y + 2;
+    
+    addField("Renglón Presupuestario: ", employeeData.renglon);
+    addField("Fecha de Ingreso: ", formatDateToDisplay(employeeData.fechaIngreso));
+    addField("Años de Antigüedad: ", aniosAntiguedad.toString());
 
-    doc.moveDown(1);
+    currentY += 8;
 
     /* =====================================================
        TEXTO LEGAL
     ===================================================== */
-    doc.font("Helvetica").fontSize(11).text(
-      "De conformidad con el artículo 50 del Reglamento de Trabajo Interno y Gestión del Recurso Humano del Consejo Nacional de Adopciones, de manera atenta solicito el goce de mis vacaciones,"
-    );
+    doc.font("Helvetica").fontSize(11)
+      .text(
+        "De conformidad con el artículo 50 del Reglamento de Trabajo Interno y Gestión del Recurso Humano del Consejo Nacional de Adopciones, de manera atenta solicito el goce de mis vacaciones, ",
+        50, currentY,
+        { 
+          continued: true,
+          width: 500,
+          align: 'justify'
+        }
+      )
+      .font("Helvetica-Bold")
+      .text(`${employeeData.cantidadDiasSolicitados} días:`);
 
-    doc.moveDown(0.5);
-    doc.font("Helvetica-Bold").text(`${employeeData.cantidadDiasSolicitados} días:`);
-
-    doc.moveDown(0.5);
+    currentY = doc.y + 12;
 
     /* =====================================================
        DETALLE
     ===================================================== */
-    doc.font("Helvetica-Bold").text("Detalle:");
-    doc.moveDown(0.3);
+    doc.font("Helvetica-Bold").fontSize(11).text("Detalle:", 50, currentY);
+    currentY += 14;
 
-    doc.font("Helvetica").text(`• Inicio de vacaciones: ${formatDateToDisplay(employeeData.fechaInicioVacaciones)}`);
-    doc.text(`• Fin de vacaciones: ${formatDateToDisplay(employeeData.fechaFinVacaciones)}`);
-    doc.text(`• Reintegro laboral: ${formatDateToDisplay(employeeData.fechaReintegro)}`);
-
-    doc.moveDown(1);
+    doc.font("Helvetica").fontSize(11);
+    doc.text(`•   Inicio de vacaciones: ${formatDateToDisplay(employeeData.fechaInicioVacaciones)}`, 70, currentY);
+    currentY += 14;
+    doc.text(`•   Fin de vacaciones: ${formatDateToDisplay(employeeData.fechaFinVacaciones)}`, 70, currentY);
+    currentY += 14;
+    doc.text(`•   Reintegro laboral: ${formatDateToDisplay(employeeData.fechaReintegro)}`, 70, currentY);
+    currentY += 18;
 
     /* =====================================================
        PERÍODOS
     ===================================================== */
-    doc.text("Los días solicitados corresponden a los siguientes períodos:");
-    doc.moveDown(0.5);
+    doc.font("Helvetica").fontSize(11)
+      .text("Los días solicitados corresponden a los siguientes períodos:", 50, currentY);
+    currentY += 14;
 
-    diasPorPeriodo.forEach(periodo => {
-      doc.text(
-        `• ${periodo.periodo}: se tomarán ${periodo.diasTomados} días, quedando ${periodo.diasDisponibles} días disponibles.`,
-        { indent: 15 }
-      );
+    // Procesar cada período con espaciado optimizado
+    diasPorPeriodo.forEach((periodo, index) => {
+      doc.font("Helvetica").fontSize(11)
+        .text(`•   `, 70, currentY, { continued: true })
+        .font("Helvetica-Bold")
+        .text(`${periodo.periodo}`, { continued: true })
+        .fillColor("#000000")
+        .font("Helvetica")
+        .text(`: se tomarán ${periodo.diasTomados} días, quedando ${periodo.diasDisponibles} días disponibles.`);
+      
+      // Espaciado entre períodos (más compacto)
+      currentY += 13;
     });
 
-    doc.moveDown(1.5);
+    currentY += 12;
 
     /* =====================================================
        JUSTIFICACIÓN
     ===================================================== */
-    doc.font("Helvetica-Bold").fontSize(11).text("JUSTIFICACIÓN");
-    doc.font("Helvetica").fontSize(10).text(
-      "(Llenar este campo si la fecha del formulario es menor a diez (10) días de la fecha de inicio, según circular CNA-URRHH)"
-    );
+    doc.font("Helvetica-Bold").fontSize(11).text("JUSTIFICACIÓN", 50, currentY);
+    currentY += 10;
 
-    const justificationY = doc.y + 10;
-    doc.rect(60, justificationY, doc.page.width - 120, 90).stroke();
+    doc.font("Helvetica").fontSize(9)
+      .text(
+        "(Llenar este campo si la fecha del formulario es menor a diez (10) días de la fecha de inicio, según lo establecido en la circular CNA-URRHH-022-2025, REPROGRAMACIÓN DEL PLAN DE VACACIONES)",
+        50, currentY,
+        { width: 500 }
+      );
 
-    doc.moveDown(6);
+    currentY = doc.y + 8;
+    
+    // Rectángulo para justificación
+    doc.rect(50, currentY, 500, 50).stroke();
+
+    currentY += 62;
 
     /* =====================================================
-       CONDICIONES
+       FIRMAS - SIN CUADROS
+    ===================================================== */
+    const col1X = 80;
+    const col2X = 350;
+
+    // Líneas de firma
+    doc.font("Helvetica").fontSize(10)
+      .text("F.___________________________________", col1X, currentY);
+    
+    doc.text("F.___________________________________", col2X, currentY);
+
+    currentY += 15;
+
+    // Nombres y cargos - Columna 1
+    doc.font("Helvetica-Bold").fontSize(9)
+      .text(employeeData.nombreCompleto, col1X, currentY, { 
+        width: 220,
+        lineGap: 2
+      });
+    
+    currentY += 11;
+    
+    doc.font("Helvetica").fontSize(9)
+      .text(employeeData.puesto, col1X, currentY, { 
+        width: 220,
+        lineGap: 2
+      });
+    
+    currentY += 11;
+
+    // Nombres y cargos - Columna 2
+    let col2Y = currentY - 22; // Volver al inicio para la segunda columna
+    
+    doc.font("Helvetica-Bold").fontSize(9)
+      .text(employeeData.nombreJefe || "Marvin Joel Garcia Abaj", col2X, col2Y, { 
+        width: 220,
+        lineGap: 2
+      });
+    
+    col2Y += 11;
+    
+    doc.font("Helvetica").fontSize(9)
+      .text(employeeData.puestoJefe || "Jefe de Tecnologías de la Información y Comunicación", col2X, col2Y, { 
+        width: 220,
+        lineGap: 2
+      });
+    
+    col2Y += 11;
+
+    // Calcular la posición Y máxima entre ambas columnas y agregar espacio extra
+    currentY = Math.max(currentY, col2Y) + 35;
+
+    /* =====================================================
+       CONDICIONES - CENTRADO
     ===================================================== */
     doc.font("Helvetica-Bold").fontSize(11)
-      .text("CONDICIONES DE ACEPTACIÓN EN LA UNIDAD DE RECURSOS HUMANOS");
+      .text(
+        "CONDICIONES DE ACEPTACIÓN EN LA UNIDAD DE RECURSOS HUMANOS", 
+        0, 
+        currentY, 
+        {
+          align: "center",
+          width: doc.page.width
+        }
+      );
 
-    doc.font("Helvetica").fontSize(10).text(
-      "Este formulario debe ser impreso, firmado y entregado en la Unidad de Recursos Humanos, antes del día que el trabajador inicie su periodo vacacional."
-    );
+    currentY = doc.y + 10;
 
-    doc.moveDown(3);
+    doc.font("Helvetica-Oblique").fontSize(10)
+      .text(
+        "Este formulario debe ser impreso, firmado y entregado en las Unidad de Recursos Humanos, antes",
+        0, 
+        currentY,
+        { 
+          align: "center",
+          width: doc.page.width
+        }
+      );
 
-    /* =====================================================
-       FIRMAS
-    ===================================================== */
-    const yFirmas = doc.y;
+    currentY = doc.y + 2;
 
-    doc.text("______________________________", 80, yFirmas);
-    doc.text("______________________________", 350, yFirmas);
-
-    doc.moveDown(0.5);
-    doc.font("Helvetica-Bold").text("Firma del trabajador", 105);
-    doc.text("Vo.Bo. Recursos Humanos", 360);
+    doc.font("Helvetica-Oblique").fontSize(10)
+      .text(
+        "del día que el trabajador inicie su periodo vacacional.",
+        0, 
+        currentY,
+        { 
+          align: "center",
+          width: doc.page.width
+        }
+      );
 
     /* =====================================================
        FINALIZAR PDF
