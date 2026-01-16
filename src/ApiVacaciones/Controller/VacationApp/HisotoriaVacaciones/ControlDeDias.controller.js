@@ -23,7 +23,6 @@ export const acreditarDiasPorPeriodoController = async (req, res) => {
 
 export const debitarDiasPorPeriodoController = async (req, res) => {
     try{
-        console.log("se ejecuta"    );
         const hitorialIngresados = await debitarDiasPorPeriodoService(req.body);
         const responseData = {
             status: 200,
