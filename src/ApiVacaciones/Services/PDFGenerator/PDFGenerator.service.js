@@ -148,7 +148,7 @@ export const generateVacationRequestPDF = async (employeeData, diasPorPeriodo) =
       doc.font("Helvetica").fontSize(11)
         .text(`•   `, 70, currentY, { continued: true })
         .font("Helvetica-Bold")
-        .text(`${periodo.periodo}`, { continued: true })
+        .text(`01/01/${periodo.periodo} al 31/12/${periodo.periodo}`, { continued: true })
         .fillColor("#000000")
         .font("Helvetica")
         .text(`: se tomarán ${periodo.diasTomados} días, quedando ${periodo.diasDisponibles} días disponibles.`);
@@ -177,7 +177,7 @@ export const generateVacationRequestPDF = async (employeeData, diasPorPeriodo) =
     // Rectángulo para justificación
     doc.rect(50, currentY, 500, 50).stroke();
 
-    currentY += 62;
+    currentY += 90;
 
     /* =====================================================
        FIRMAS - SIN CUADROS
