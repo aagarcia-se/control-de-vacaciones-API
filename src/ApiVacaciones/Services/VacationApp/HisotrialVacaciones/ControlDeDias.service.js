@@ -1,7 +1,7 @@
 import dayjs from "dayjs";
 import { consultarPeriodosYDiasPorEmpeladoDao } from "../../../Dao/VacationApp/HistorialVacaciones/ConsultasHistorial.dao.js";
 import { acreditarDiasPorPeriodoLoteDao, ActualizarDiasAcumuladosPorPeriodoDao, debitarDiasPorPeriodoDao, getUltiaAcreditacionDiasDao, } from "../../../Dao/VacationApp/HistorialVacaciones/ControlDeDias.dao.js";
-import { formatearFecha, validarFechaUltimaActualizacion, } from "../../Utils/DateUtils.js";
+import { destructurarFecha, destructurarFechaActual, formatearFecha, validarFechaUltimaActualizacion, } from "../../Utils/DateUtils.js";
 import { generarDiasAcumuladosPorPeriodo, obtenerPeriodosParaVacaciones } from "./CalculoDeDias.service.js";
 import { actualizarEstadoSolicitudDao } from "../../../Dao/VacationApp/ModificarSolicitud.Dao.js";
 
@@ -38,9 +38,30 @@ export const acreditarDiasPorPeriodoService = async (data) => {
     }
 
     // Actualizar o insertar días acumulados
-    const resultado = data.fechaUpdate
-      ? await ActualizarDiasAcumuladosPorPeriodoDao(payload) // Actualización
-      : await acreditarDiasPorPeriodoLoteDao(payload);       // Inserción
+    let resultado;
+    if(data.fechaUpdate && destructurarFecha(data.fechaUpdate).anio === destructurarFechaActual().anioEnCurso){
+      
+      resultado = await ActualizarDiasAcumuladosPorPeriodoDao(payload);
+    
+    }else if(data.fechaUpdate && destructurarFecha(data.fechaUpdate).anio !== destructurarFechaActual().anioEnCurso){
+
+      payload.forEach(async (periodo, index) => {
+
+          if(periodo.tipoIngreso === 'insert'){
+            resultado = await acreditarDiasPorPeriodoLoteDao([periodo]);
+          }
+
+          if(periodo.tipoIngreso === 'update'){
+            resultado = await ActualizarDiasAcumuladosPorPeriodoDao(periodo);
+          }
+
+      });
+
+
+    }
+    else{
+      resultado = await acreditarDiasPorPeriodoLoteDao(payload);
+    }
 
     return resultado;
   } catch (error) {

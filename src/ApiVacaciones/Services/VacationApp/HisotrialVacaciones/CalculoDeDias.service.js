@@ -72,9 +72,7 @@ const getDiasAcumuladosAnioAtrasadoIncompleto = (fechaIngreso) => {
  */
 const getDiasAnioEnCursoIncompleto = (anio) => {
   const fechaInicioAnioEnCurso = `${anio}-01-02`;
-  const cantidadDiasIngresoAUltimoMes = diasIngresoHastaDiaEnCurso(
-    fechaInicioAnioEnCurso
-  );
+  const cantidadDiasIngresoAUltimoMes = diasIngresoHastaDiaEnCurso(fechaInicioAnioEnCurso);
 
   const sumatoria = (cantidadDiasIngresoAUltimoMes * 20) / 365;
   const diasAcumulados = Math.round(sumatoria);
@@ -240,6 +238,48 @@ const generarPayloadPeriodoAnioEncurso = (data) => {
   return payload;
 };
 
+
+export const generarPayloadPeriodoAnioEnCursoCambioDeAnio = (data) => {
+  const { anioEnCurso } = destructurarFechaActual(); // Año en curso desestructurado
+  const { mes: mesUltimaActualizacion } = destructurarFecha(data.fechaUpdate); // Mes de la última actualización
+  const periodoVacaciones = GenerarPeriodo(data.fechaUpdate); // Generar periodos de vacaciones basados en la fecha de actualización
+  const payload = [];
+
+  periodoVacaciones.forEach((periodo, index) => {
+    let diasPeriodo = 0;
+    let sumatoriaCalculo = 0;
+
+    if(periodo !== anioEnCurso && mesUltimaActualizacion !== 12){
+      // Calcular los días acumulados en el año anterior
+      const diasPorAnio = obtenerDiasPorAnio(periodo);
+      diasPeriodo = getDiasAcumuladosAnioAtrasadoCompleto(diasPorAnio);
+
+    }
+
+    if(periodo === anioEnCurso){
+      // Calcular los días acumulados en el año en curso
+      const diasAnioEnCurso = getDiasAnioEnCursoIncompleto(anioEnCurso);
+      diasPeriodo = diasAnioEnCurso.diasAcumulados;
+      sumatoriaCalculo = diasAnioEnCurso.sumatoria;
+    }
+
+    const payloadObj = {
+      idEmpleado: data.idEmpleado,
+      idInfoPersonal: data.idInfoPersonal,
+      periodo: index + 1,
+      anioPeriodo: periodo,
+      diasPeriodo: diasPeriodo,
+      sumatoriaCalculo: sumatoriaCalculo,
+      fechaActualizacion: dayjs().format("YYYY-MM-DD"),
+      fechaAcreditacion: dayjs().format("YYYY-MM-DD"),
+      tipoIngreso: periodo === anioEnCurso  ? 'insert' : 'update',
+    };
+    payload.push(payloadObj);
+  }); 
+
+  return payload;
+};
+
 /**
  * Genera un payload con la información del empleado y los días acumulados de vacaciones
  * en el año en curso, asegurando que el año de ingreso coincida con el año en curso.
@@ -326,8 +366,12 @@ export const generarDiasAcumuladosPorPeriodo = (data) => {
   const { fechaUpdate } = data;
 
   // Determinar el payload según la existencia de `fechaUpdate`
-  if (fechaUpdate) {
+  if (fechaUpdate && destructurarFecha(fechaUpdate).anio === anioEnCurso) {
     return generarPayloadPeriodoAnioEncurso(data);
+  }
+
+  if (fechaUpdate && destructurarFecha(fechaUpdate).anio !== anioEnCurso) {
+    return generarPayloadPeriodoAnioEnCursoCambioDeAnio(data);
   }
 
   if (anioIngreso === anioEnCurso) {
