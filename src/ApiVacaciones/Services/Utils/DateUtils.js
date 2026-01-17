@@ -199,12 +199,12 @@ export const GenerarPeriodo = (fecha) => {
  * la última actualización, lo que indica que se debe actualizar. De lo contrario, devuelve `false`.
  */
 export const validarFechaUltimaActualizacion = (fechaActualizacion) => {
-  const { mes: mesUpdate } = destructurarFecha(fechaActualizacion); // Año de la última actualización
-  const { mesEnCurso } = destructurarFechaActual(); // Año en curso desestructurado
+  const { mes: mesUpdate, anio: anioUpdate } = destructurarFecha(fechaActualizacion); // Año de la última actualización
+  const { mesEnCurso, anioEnCurso } = destructurarFechaActual(); // Año en curso desestructurado
 
   let siSeActualiza = false;
 
-  if (mesEnCurso > mesUpdate) {
+  if (anioEnCurso > anioUpdate || (anioEnCurso === anioUpdate && mesEnCurso > mesUpdate)) {
     siSeActualiza = true;
   }
 
