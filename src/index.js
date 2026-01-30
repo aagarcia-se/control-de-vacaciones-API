@@ -16,6 +16,7 @@ import { suspensionesRoute } from "./ApiVacaciones/Routes/Suspensiones/Suspensio
 import { coordinadoresRoute } from "./ApiVacaciones/Routes/Coordinadores/Coordinadores.routes.js";
 import { emailRoute } from "./ApiVacaciones/Routes/Email/Emails.routes.js";
 import { vacacionesespecialesRoute } from "./ApiVacaciones/modules/vacacionesespeciales/vacacionesespeciales.routes.js";
+import { administracionvacacionesRoute } from "./ApiVacaciones/modules/GestionVacacionesRRHH/administracionvacaciones.route.js";
 
 
 const app = express();
@@ -40,6 +41,8 @@ app.use('/api/', suspensionesRoute);
 app.use('/api/', coordinadoresRoute);
 app.use('/api/', emailRoute);
 app.use('/api/', vacacionesespecialesRoute);
+app.use('/api/', administracionvacacionesRoute);
+
 
 
 //Reportes
