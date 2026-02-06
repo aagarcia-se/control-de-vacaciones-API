@@ -4,4 +4,4 @@ import { cancelarSolicitudAutorizadaController, consultarSolicitudesVacacionesAu
 export const administracionvacacionesRoute = Router();
 
 administracionvacacionesRoute.get('/consultarSolicitudesVacacionesAutorizadas', consultarSolicitudesVacacionesAutorizadasController);
-administracionvacacionesRoute.post('/cancelarSolicitudAutorizada', cancelarSolicitudAutorizadaController);
+administracionvacacionesRoute.put('/cancelarSolicitudAutorizada', cancelarSolicitudAutorizadaController);
