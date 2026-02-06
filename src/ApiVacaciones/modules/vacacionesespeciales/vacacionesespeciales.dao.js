@@ -1,7 +1,6 @@
 import { Connection } from "../../Dao/Connection/ConexionSqlite.dao.js";
 
 export const registrarVacacionesEspecialesDao = async (data) => {
-    console.log(data)
     try {
         const queryInsert = `
             INSERT INTO vacaciones_especiales (idEmpleado, idInfoPersonal, 
