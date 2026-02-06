@@ -17,6 +17,8 @@ export const notificarSolicitudVacacionesIngresada = async (data) => {
     //Integrar datos genereales de la solcitud
     const dataSolicitud = { ...data, ...coordinador, ...infoEmpleado };
 
+    console.log(dataSolicitud);
+
     //Generar plantilla para el envio de correo
     const plantillaHtml = GenerarPlantillasCorreos("solicitud-vacaciones",dataSolicitud);
 
