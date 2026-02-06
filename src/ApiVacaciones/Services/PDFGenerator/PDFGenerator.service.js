@@ -25,7 +25,7 @@ export const generateVacationRequestPDF = async (employeeData, diasPorPeriodo) =
     // Obtener mes y año actuales con dayjs
     const currentMonth = dayjs().month() + 1; // dayjs().month() devuelve 0-11
     const currentYear = dayjs().year();
-    const numeroBoleta = `CNA-URRHH-${currentMonth}-${currentYear}`;
+    const numeroBoleta = `CNA-URRHH-${employeeData.idSolicitud}`;
 
     /* =====================================================
        LOGO
@@ -133,7 +133,7 @@ export const generateVacationRequestPDF = async (employeeData, diasPorPeriodo) =
     currentY += 14;
     doc.text(`•   Fin de vacaciones: ${formatDateToDisplay(employeeData.fechaFinVacaciones)}`, 70, currentY);
     currentY += 14;
-    doc.text(`•   Reintegro laboral: ${formatDateToDisplay(employeeData.fechaReintegro)}`, 70, currentY);
+    doc.text(`•   Reintegro laboral: ${formatDateToDisplay(employeeData.fechaRetornoLabores)}`, 70, currentY);
     currentY += 18;
 
     /* =====================================================
@@ -214,15 +214,15 @@ export const generateVacationRequestPDF = async (employeeData, diasPorPeriodo) =
     let col2Y = currentY - 22; // Volver al inicio para la segunda columna
     
     doc.font("Helvetica-Bold").fontSize(9)
-      .text(employeeData.nombreJefe || "Marvin Joel Garcia Abaj", col2X, col2Y, { 
+      .text(employeeData.nombreCoordinador || "N/A", col2X, col2Y, { 
         width: 220,
         lineGap: 2
-      });
+      })
     
     col2Y += 11;
     
     doc.font("Helvetica").fontSize(9)
-      .text(employeeData.puestoJefe || "Jefe de Tecnologías de la Información y Comunicación", col2X, col2Y, { 
+      .text(employeeData.puestoCoordinador || "N/A", col2X, col2Y, { 
         width: 220,
         lineGap: 2
       });
